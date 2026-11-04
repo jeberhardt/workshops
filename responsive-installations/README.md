@@ -15,6 +15,7 @@ Every input can be connected to any property of the circle or its animation.
 | `codeview.js` | The **Code** button: shows the step's sketch over the canvas | Rarely |
 | `index.html`, `style.css` | Page and panel styling | Rarely |
 | `test_server.py` | Fake "Raspberry Pi" for testing without hardware | Starting point for your Pi bridge |
+| `requirements.txt` | Python packages the server needs | Add packages here (e.g. `gpiozero`) |
 
 **Locally:** open the folder with any static server (e.g. VS Code Live Server, or `python3 -m http.server`).
 **p5.js Web Editor:** create a new sketch and upload the files. See the https note below before connecting hardware.
@@ -43,12 +44,26 @@ without dropdowns) and real hardware with `setupHardware()`.
 Hardware gives a number → we normalize it to **0..1** → we stretch it to a property's **min..max** → we smooth it.
 
 ## Connecting real hardware
-1. Run a WebSocket server that sends sensor readings (on the Pi, or `python3 test_server.py` to test — needs `pip install websockets`).
+1. Run a WebSocket server that sends sensor readings (on the Pi, or `python3 test_server.py` to test — see *Installing the Python packages* below).
 2. Type its address in the panel (e.g. `ws://raspberrypi.local:8765`) and press **Connect**.
 3. Each input that receives a reading turns **LIVE** (green) and stops simulating. Inputs with no hardware keep simulating.
    If the connection drops, it retries every 2 s and the cards fall back to simulation.
 
 For an installation, open the page with `?ws=ws://raspberrypi.local:8765` at the end of the address to connect automatically.
+
+### Installing the Python packages
+The server's packages are listed in `requirements.txt`.
+
+**On a laptop:** `pip install -r requirements.txt`, then `python3 test_server.py`.
+
+**On a Raspberry Pi:** recent Raspberry Pi OS (Bookworm and later) refuses `pip install` into the system Python
+("externally-managed-environment"). Use a virtual environment:
+```bash
+python3 -m venv --system-site-packages .venv   # --system-site-packages keeps the Pi's own gpiozero available
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python test_server.py
+```
+Or skip pip and install the system package: `sudo apt install python3-websockets`, then `python3 test_server.py`.
 
 ### Message format
 JSON, as one object, several at once, or a list:

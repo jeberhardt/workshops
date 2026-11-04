@@ -5,7 +5,7 @@ Sends fake readings for every input, 30 times a second, so you can
 check the sketch's WebSocket connection without any hardware.
 Swap readings() for real sensor reads and this becomes your Pi bridge.
 
-    pip install websockets
+    pip install -r requirements.txt   (on a Pi, see the README)
     python test_server.py              -> ws://localhost:8765
 
 Then press Connect in the sketch's panel.
