@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Responsive Installations</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js"></script>
+</head>
+<body>
+  <main id="stage"></main>
+
+  <aside id="panel">
+    <header>
+      <h1>Responsive Installations</h1>
+      <nav id="steps" aria-label="Workshop steps">
+        <button id="step-prev" class="btn small" aria-label="Previous step">‹</button>
+        <select id="step-menu" aria-label="Step"></select>
+        <button id="step-next" class="btn small" aria-label="Next step">›</button>
+      </nav>
+      <p id="step-about"></p>
+      <p class="keys"><button id="code-btn" class="btn small">Code</button> <kbd>←</kbd><kbd>→</kbd> step · <kbd>C</kbd> code · <kbd>P</kbd> panel · <kbd>F</kbd> fullscreen</p>
+      <div id="hw-ui" hidden>
+      <div class="conn">
+        <span id="ws-dot" class="led off"></span>
+        <input id="ws-url" type="text" spellcheck="false" autocomplete="off" aria-label="WebSocket address">
+        <button id="ws-btn" class="btn small">Connect</button>
+      </div>
+      <p id="ws-status" class="sub">Simulated — not connected</p>
+      <label class="opt"><input type="checkbox" id="noise" checked> Realistic sensor noise</label>
+      </div>
+    </header>
+    <div id="inputs"></div>
+  </aside>
+
+  <script src="controls.js"></script>
+  <script src="wiring.js"></script>
+  <script src="hardware.js"></script>
+  <script src="codeview.js"></script>
+  <script src="steps.js"></script>   <!-- loads the step's sketch from steps/ -->
+</body>
+</html>
