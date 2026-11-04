@@ -14,8 +14,9 @@ Every input can be connected to any property of the circle or its animation.
 | `wiring.js` | Breadboard diagrams: how to wire each part to the Pi | Change pins here |
 | `codeview.js` | The **Code** button: shows the step's sketch over the canvas | Rarely |
 | `index.html`, `style.css` | Page and panel styling | Rarely |
-| `test_server.py` | Fake "Raspberry Pi" for testing without hardware | Starting point for your Pi bridge |
-| `requirements.txt` | Python packages the server needs | Add packages here (e.g. `gpiozero`) |
+| `pi_bridge.py` | The real Pi bridge: reads the wired parts with gpiozero, sends them to the sketch | List your wired parts in `WIRED` |
+| `test_server.py` | Fake "Raspberry Pi" for testing without hardware | Rarely |
+| `requirements.txt` | Python packages the servers need | Add packages here |
 
 **Locally:** open the folder with any static server (e.g. VS Code Live Server, or `python3 -m http.server`).
 **p5.js Web Editor:** create a new sketch and upload the files. See the https note below before connecting hardware.
@@ -44,7 +45,9 @@ without dropdowns) and real hardware with `setupHardware()`.
 Hardware gives a number → we normalize it to **0..1** → we stretch it to a property's **min..max** → we smooth it.
 
 ## Connecting real hardware
-1. Run a WebSocket server that sends sensor readings (on the Pi, or `python3 test_server.py` to test — see *Installing the Python packages* below).
+1. Run a WebSocket server that sends sensor readings: `python pi_bridge.py` on the Pi, or `python test_server.py` for fake readings without hardware
+   (inside the venv: see *Installing the Python packages* below). Only wired some parts? Comment out the others in `WIRED` at the top of `pi_bridge.py`,
+   so their cards keep simulating instead of reading noise from empty pins.
 2. Type its address in the panel (e.g. `ws://raspberrypi.local:8765`) and press **Connect**.
 3. Each input that receives a reading turns **LIVE** (green) and stops simulating. Inputs with no hardware keep simulating.
    If the connection drops, it retries every 2 s and the cards fall back to simulation.
@@ -52,18 +55,25 @@ Hardware gives a number → we normalize it to **0..1** → we stretch it to a p
 For an installation, open the page with `?ws=ws://raspberrypi.local:8765` at the end of the address to connect automatically.
 
 ### Installing the Python packages
-The server's packages are listed in `requirements.txt`.
+The servers' packages are listed in `requirements.txt` and go into a virtual environment (a `.venv` folder next to the files).
+Recent Raspberry Pi OS (Bookworm and later) refuses `pip install` outside one ("externally-managed-environment").
 
-**On a laptop:** `pip install -r requirements.txt`, then `python3 test_server.py`.
-
-**On a Raspberry Pi:** recent Raspberry Pi OS (Bookworm and later) refuses `pip install` into the system Python
-("externally-managed-environment"). Use a virtual environment:
+**Once, in the `responsive-installations` folder:**
 ```bash
-python3 -m venv --system-site-packages .venv   # --system-site-packages keeps the Pi's own gpiozero available
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python test_server.py
+python3 -m venv --system-site-packages .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
-Or skip pip and install the system package: `sudo apt install python3-websockets`, then `python3 test_server.py`.
+
+**Each time you open a new terminal:**
+```bash
+source .venv/bin/activate      # the prompt now starts with (.venv)
+python pi_bridge.py            # on the Pi; or python test_server.py for fake readings
+```
+
+`--system-site-packages` lets the venv use the `gpiozero` that comes with Raspberry Pi OS, already set up for the Pi's pins
+(and the libraries it needs for the pins and SPI). That's why `gpiozero` isn't in `requirements.txt`.
+The same commands work on a laptop for `test_server.py`.
 
 ### Message format
 JSON, as one object, several at once, or a list:
