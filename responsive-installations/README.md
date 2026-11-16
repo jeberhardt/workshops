@@ -1,3 +1,5 @@
+![Raspberry Pi + p5.js Workshop](assets/header.jpg)
+
 # Workshop: Responsive Installations
 
 A p5.js sketch of one animated circle, plus a control panel of inputs.
