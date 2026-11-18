@@ -114,11 +114,19 @@ def setup_adc(channel):
         return lambda: round(adc.value, 3)
     return setup
 
+def needs(packages):
+    """The error to show when a library is missing: names the pip command that fixes it."""
+    return RuntimeError(f"library missing: in the venv, run  pip install {packages}  then Restart")
+
+
 def setup_light():
     # The LDR reads through an ADS1115 breakout on I2C (A0), not the MCP3008.
-    import board
-    import adafruit_ads1x15.ads1115 as ADS
-    from adafruit_ads1x15.analog_in import AnalogIn
+    try:
+        import board
+        import adafruit_ads1x15.ads1115 as ADS
+        from adafruit_ads1x15.analog_in import AnalogIn
+    except ImportError:
+        raise needs("adafruit-blinka adafruit-circuitpython-ads1x15")
     ads = ADS.ADS1115(board.I2C())      # address 0x48: ADDR left unconnected
     a0 = getattr(ADS, "P0", None)
     if a0 is None:                      # newer versions of the library name the pins differently
@@ -186,11 +194,14 @@ def is_pi5():
 
 
 def setup_pixels():
-    import board
     if is_pi5():
         # Pi 5: Adafruit's Pi 5 library (pip install adafruit-blinka-raspberry-pi5-neopixel)
-        import adafruit_pixelbuf
-        from adafruit_raspberry_pi5_neopixel_write import neopixel_write
+        try:
+            import board
+            import adafruit_pixelbuf
+            from adafruit_raspberry_pi5_neopixel_write import neopixel_write
+        except ImportError:
+            raise needs("adafruit-blinka adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf")
 
         class Pi5Pixels(adafruit_pixelbuf.PixelBuf):
             def __init__(self, pin, size, **kwargs):
@@ -206,7 +217,11 @@ def setup_pixels():
         # Pi 3/4: the usual library (pip install adafruit-circuitpython-neopixel). Needs sudo.
         if os.geteuid() != 0:
             raise RuntimeError("on a Pi 3/4 the NeoPixels need sudo (see Outputs in the README)")
-        import neopixel
+        try:
+            import board
+            import neopixel
+        except ImportError:
+            raise needs("adafruit-blinka adafruit-circuitpython-neopixel")
         strip = neopixel.NeoPixel(board.D18, PIXEL_COUNT,
                                   brightness=PIXEL_BRIGHTNESS, auto_write=True)
 

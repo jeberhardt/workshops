@@ -173,7 +173,7 @@ The pins are planned so every part can be connected at the same time:
 
 The Pi has no analog inputs, so analog parts go through an ADC chip:
 - The **LDR** uses an **ADS1115** breakout on I2C. Turn I2C on with `sudo raspi-config` → Interface Options → I2C,
-  then `i2cdetect -y 1` should show `48`. In the venv: `pip install adafruit-circuitpython-ads1x15`.
+  then `i2cdetect -y 1` should show `48`. In the venv: `pip install adafruit-blinka adafruit-circuitpython-ads1x15`.
   `pi_bridge.py` sends A0's voltage ÷ 3.3, so 0..1 (more light, higher).
 - The other analog parts go through an **MCP3008** ADC on SPI
   (CLK → pin 23, DOUT → pin 21, DIN → pin 19, CS → pin 24). Turn SPI on with `sudo raspi-config` → Interface Options → SPI.
@@ -195,12 +195,12 @@ The NeoPixels need their own library, and which one depends on the Pi. In the ve
 
 **Pi 5:**
 ```bash
-pip install adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf
+pip install adafruit-blinka adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf
 ```
 
 **Pi 3, 3+ or 4:**
 ```bash
-pip install adafruit-circuitpython-neopixel
+pip install adafruit-blinka adafruit-circuitpython-neopixel
 ```
 On these Pis the NeoPixel library needs root, and it shares hardware with the headphone jack's sound:
 - Turn the sound off: add `dtparam=audio=off` to `/boot/firmware/config.txt`, then reboot.

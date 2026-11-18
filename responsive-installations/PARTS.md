@@ -24,7 +24,7 @@ and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels*
 | 1 | microSD card, 16 GB or more | Raspberry Pi OS (Bookworm or later), which includes `gpiozero` |
 | 1 | Pi power supply | The official supply for your model |
 | — | I2C turned on | `sudo raspi-config` → Interface Options → I2C (needed for the ADS1115) |
-| — | `adafruit-circuitpython-ads1x15` | `pip install` in the venv, for the ADS1115 |
+| — | `adafruit-blinka`, `adafruit-circuitpython-ads1x15` | `pip install` in the venv, for the ADS1115 |
 
 ## Prototyping
 | Qty | Item | Notes |
