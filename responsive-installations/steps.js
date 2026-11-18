@@ -92,7 +92,7 @@ const SLIDES = [
   { id: 'fullscreen', title: 'Going full screen' },
   { id: 'break', title: '10-minute break' },
   { id: 'inputs', title: 'From one bit to the whole room' },
-  { id: 'proximity', title: 'Input 3 · Proximity' },
+  { id: 'proximity', title: 'Input 2 · Proximity' },
   { id: 'smoothing', title: 'Raw sensors are noisy' },
   { id: 'smoothing-code', title: 'Smoothing in code' },
   { id: 'inputs-more', title: 'More inputs to explore' },
