@@ -9,7 +9,7 @@ Every input can be connected to any property of the circle or its animation.
 ## Files
 | File | What it is | Who edits it |
 |---|---|---|
-| `steps/step1.js` … `steps/step11.js` | One p5.js sketch per workshop step (step 11: `PROPS`, the drawing, the animation) | Everyone — this is the canvas |
+| `steps/step1.js` … `steps/step11.js` | One p5.js sketch per workshop step (step 10: `PROPS`, the drawing, the animation) | Everyone — this is the canvas |
 | `steps.js` | The list of steps and the step buttons | Add a step here |
 | `controls.js` | The simulated sensors and the panel | Add inputs here |
 | `hardware.js` | WebSocket connection to real hardware | Set hardware ranges in `HW_RANGES` |
@@ -48,7 +48,7 @@ On steps with input cards (9–11), the Code view has a second, read-only tab, *
 9. **Simulated sensors** — a still circle and three panel cards (button → size, proximity → left/right, light → brightness); each `inputs.<id>.value` is 0..1, just like the mouse.
 10. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
     *Hidden for now (`hidden: true` in `steps.js`), so the menu shows Real hardware as step 10.*
-11. **Real hardware** — step 10 plus `setupHardware()`: readings from the Pi, wiring diagrams.
+11. **Real hardware** — step 9 plus `setupHardware()`: the same three parts doing the same things, now with readings from the Pi, and wiring diagrams.
 
 To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`. To hide one without deleting it, add `hidden: true` to its line.
 A step gets input cards with `buildControlPanel(PROPS)` (or `buildControlPanel(null, ['slider', …])` for a few cards
@@ -174,9 +174,9 @@ LDR light sensor (with "cover" button) · PIR motion (stays HIGH 3 s) · capacit
 Turn off **Realistic sensor noise** to compare clean vs. real-world readings.
 
 ## Things to try
-- **Add a property:** add a line to `PROPS` in `steps/step11.js` and use `current.yourProp` in `draw()`. It appears in every dropdown.
+- **Add a property:** add a line to `PROPS` in `steps/step10.js` and use `current.yourProp` in `draw()`. It appears in every dropdown.
 - **Add an input:** add an entry to `INPUT_DEFS` and (if it's a new type) a widget in `WIDGETS` in `controls.js`. Hardware can then send readings under its id.
-- **Change the feel:** `SMOOTHING` in `steps/step11.js` (1 = instant, 0.05 = dreamy).
+- **Change the feel:** `SMOOTHING` in any step from 8 on (1 = instant, 0.05 = dreamy).
 
 ## Component photos
 Each card shows a small photo of the real part, loaded from Wikimedia Commons (openly licensed).

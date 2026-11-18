@@ -40,14 +40,14 @@ loaded; changing step reloads the page.
   A step opts in with `buildControlPanel(PROPS)`, or `buildControlPanel(null, ['slider', …])` for cards without dropdowns.
 - `hardware.js`: `setupHardware()` (step 11 only) opens the WebSocket. An input that receives readings turns LIVE and
   stops simulating. `HW_RANGES` converts the hardware's units (e.g. proximity in cm) into 0..1.
-- Steps 10–11: `PROPS` lists every property an input can drive (min/max/resting value). `applyMappings()` lerps each
+- Step 10 (hidden for now): `PROPS` lists every property an input can drive (min/max/resting value). `applyMappings()` lerps each
   input into its target's range, averages several inputs on one target, and smooths with `SMOOTHING`.
 
 **Contracts that span files. Change them together:**
 - Input ids (`button`, `slider`, `joystickX`, …) appear in `INPUT_DEFS`, `HW_RANGES`, `wiring.js`, `pi_bridge.py` (`WIRED`),
   `test_server.py` (`readings()`) and the README's message-format section.
 - `INPUT_DEFS[].target` must be a key of `PROPS`.
-- Step 11 is step 10 plus `setupHardware()`, so their `PROPS` and drawing code must stay identical.
+- Step 11 (Real hardware) is step 9 (Simulated sensors) plus `setupHardware()`, so their cards and drawing code must stay identical.
 - Each `STEPS` entry lists `globals`/`functions`. Over `file://` the Code view can't fetch the file, so it rebuilds
   the code from these names. It also assumes step constants are in CAPITALS (that's how it tells `const` from `let`).
 

@@ -19,7 +19,7 @@
 // The inputs on the panel. Add your own here.
 //   type     : which widget to draw (see WIDGETS below)
 //   kind     : 'digital' (on/off) or 'analog' (a range)
-//   target   : the property it starts connected to (a key of PROPS in steps/step11.js)
+//   target   : the property it starts connected to (a key of PROPS in steps/step10.js)
 //   start    : starting value 0..1
 //   channels : for inputs that give more than one value (a joystick gives X and Y)
 // -----------------------------------------------------------------

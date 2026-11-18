@@ -18,7 +18,7 @@ function setup() {
   const stage = document.getElementById('stage');
   createCanvas(stage.clientWidth, stage.clientHeight).parent(stage);
   buildControlPanel(null, ['button', 'proximity', 'light']);   // from controls.js: just these cards
-  sensorNoise = false;   // clean, steady readings (real sensors are noisier: see step 11)
+  sensorNoise = false;   // clean, steady readings (real sensors are noisier)
 }
 
 function draw() {

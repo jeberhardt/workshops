@@ -1,123 +1,44 @@
-/* =================================================================
-   Step 11 — REAL HARDWARE
-   -----------------------------------------------------------------
-   Step 10 plus one line: setupHardware() connects to the Raspberry Pi
-   over a WebSocket (hardware.js). Any input that receives readings
-   turns LIVE; the rest keep simulating. Each card's "Wiring" shows
-   how to connect the real part.
-   ================================================================= */
+// Step 11 — REAL HARDWARE
+// Step 9 plus one line: setupHardware() connects to the Raspberry Pi
+// over a WebSocket (hardware.js). Each card that receives readings from
+// the real part turns LIVE; the rest keep simulating. The sketch doesn't
+// change at all: a real sensor gives inputs.<id>.value, 0..1, just like
+// a pretend one. Open "Wiring" on a card to connect the real part.
 
-// -----------------------------------------------------------------
-// Every property an input can control.
-//   min / max : the range an input sweeps through (input 0 → min, 1 → max)
-//   value     : the resting value when no input is connected
-// Add a property here and it shows up in every dropdown automatically.
-// -----------------------------------------------------------------
-const PROPS = {
-  // --- the circle ---
-  x:            { group: 'Circle',    label: 'Position X',        min: 0,    max: 1,    value: 0.5  }, // fraction of width
-  y:            { group: 'Circle',    label: 'Position Y',        min: 0,    max: 1,    value: 0.5  }, // fraction of height
-  size:         { group: 'Circle',    label: 'Size',              min: 0.03, max: 0.9,  value: 0.35 }, // fraction of the smaller side
-  r:            { group: 'Circle',    label: 'Red',               min: 0,    max: 255,  value: 48   },
-  g:            { group: 'Circle',    label: 'Green',             min: 0,    max: 255,  value: 177  },
-  b:            { group: 'Circle',    label: 'Blue',              min: 0,    max: 255,  value: 242  },
-  a:            { group: 'Circle',    label: 'Alpha',             min: 0,    max: 255,  value: 255  }, // 0 = invisible
-  strokeWeight: { group: 'Circle',    label: 'Outline thickness', min: 0,    max: 30,   value: 0    },
-
-  // --- the animation ---
-  pulseSpeed:   { group: 'Animation', label: 'Pulse speed',       min: 0,    max: 4,    value: 0.5  }, // pulses per second
-  pulseAmount:  { group: 'Animation', label: 'Pulse amount',      min: 0,    max: 0.6,  value: 0.1  }, // how much the size breathes
-  orbitSpeed:   { group: 'Animation', label: 'Orbit speed',       min: -3,   max: 3,    value: 0.6  }, // radians per second
-  orbitRadius:  { group: 'Animation', label: 'Orbit radius',      min: 0,    max: 0.4,  value: 0    }, // fraction of the smaller side
-  colourSpeed:  { group: 'Animation', label: 'Colour cycling',    min: 0,    max: 0.5,  value: 0    }, // swings per second to the opposite colour
-  jitter:       { group: 'Animation', label: 'Jitter',            min: 0,    max: 40,   value: 0    }, // pixels of shake
-  trails:       { group: 'Animation', label: 'Trails',            min: 0,    max: 0.9,  value: 0    }, // 0 = none, 0.9 = long (higher leaves ghosts)
-};
-
-// How quickly properties follow their inputs.
-// 1 = instant (jumpy), 0.05 = slow and dreamy. Smooths noisy sensors and on/off jumps.
 const SMOOTHING = 0.12;
 
-const current = {};   // the live, smoothed value of every property
-
-// Animation clocks. We accumulate them so changing a speed never makes the circle jump.
-let pulsePhase = 0;
-let orbitAngle = 0;
-let colourPhase = 0;
-
+let r = 48;
+let g = 177;
+let b = 242;
+let a = 255;
+let size = 0.35;         // fraction of the smaller side
+let x = 0.5;             // fraction of the width: 0 = left edge, 1 = right edge
+let bright = 1;          // 0 = black, 1 = the full colour
 
 function setup() {
   const stage = document.getElementById('stage');
   createCanvas(stage.clientWidth, stage.clientHeight).parent(stage);
-
-  for (const key in PROPS) current[key] = PROPS[key].value;
-  buildControlPanel(PROPS, ['button', 'proximity', 'light']);   // from controls.js: the same parts as step 9
-  setupHardware();            // from hardware.js
+  buildControlPanel(null, ['button', 'proximity', 'light']);   // from controls.js: the same cards as step 9
+  setupHardware();                                             // from hardware.js: the one new line
 }
-
 
 function draw() {
-  const dt = min(deltaTime / 1000, 0.1);   // seconds since last frame
+  const dt = min(deltaTime / 1000, 0.1);
 
-  updateInputs(dt);   // 1. read the (simulated) hardware
-  applyMappings();    // 2. inputs → properties
-  const p = current;
+  // 1. read the inputs as 0..1
+  updateInputs(dt);   // runs the simulated sensors (controls.js)
 
-  // 3. advance the animation
-  pulsePhase += p.pulseSpeed * TWO_PI * dt;
-  orbitAngle += p.orbitSpeed * dt;
-  colourPhase += p.colourSpeed * TWO_PI * dt;
+  // 2. stretch and smooth
+  size       = lerp(size,       lerp(0.35, 0.2, inputs.button.value),    SMOOTHING);  // pressed = smaller
+  x          = lerp(x,          lerp(0.15, 0.85, inputs.proximity.value), SMOOTHING); // far = left, close = right
+  bright     = lerp(bright,     lerp(0.15, 1, inputs.light.value),       SMOOTHING);  // dark = dim
 
-  // 4. draw
-  // A see-through background leaves trails of the previous frames.
-  background(10, 12, 16, 255 * (1 - p.trails));
-
-  const unit = min(width, height);
-  const orbit = p.orbitRadius * unit;
-  const x = p.x * width  + cos(orbitAngle) * orbit + random(-p.jitter, p.jitter);
-  const y = p.y * height + sin(orbitAngle) * orbit + random(-p.jitter, p.jitter);
-  const diameter = p.size * unit * (1 + p.pulseAmount * sin(pulsePhase));
-  const swing = (1 - cos(colourPhase)) / 2;   // colour cycling: 0 → 1 → 0
-  const red   = lerp(p.r, 255 - p.r, swing);
-  const green = lerp(p.g, 255 - p.g, swing);
-  const blue  = lerp(p.b, 255 - p.b, swing);
-
-  fill(red, green, blue, p.a);
-  if (p.strokeWeight > 0.5) {
-    stroke(255 - red, 255 - green, 255 - blue, p.a);  // opposite-colour outline
-    strokeWeight(p.strokeWeight);
-  } else {
-    noStroke();
-  }
-  circle(x, y, diameter);
+  // 3. draw
+  background(10, 12, 16);
+  fill(r * bright, g * bright, b * bright, a);   // less light → less of each colour
+  noStroke();
+  circle(x * width, height / 2, size * min(width, height));
 }
-
-
-// -----------------------------------------------------------------
-// Inputs → properties.
-// Each input gives 0..1. We stretch that to the property's min..max.
-// Several inputs on the same property are averaged.
-// -----------------------------------------------------------------
-function applyMappings() {
-  for (const key in PROPS) {
-    const prop = PROPS[key];
-
-    const values = [];
-    for (const id in inputs) {
-      const input = inputs[id];
-      if (input.target === key) values.push(input.invert ? 1 - input.value : input.value);
-    }
-
-    let target = prop.value;   // nothing connected → resting value
-    if (values.length > 0) {
-      const average = values.reduce((a, b) => a + b, 0) / values.length;
-      target = lerp(prop.min, prop.max, average);
-    }
-
-    current[key] = lerp(current[key], target, SMOOTHING);
-  }
-}
-
 
 function windowResized() {
   const stage = document.getElementById('stage');

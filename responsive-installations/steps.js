@@ -55,9 +55,9 @@ const STEPS = [
     globals: ['PROPS', 'SMOOTHING'],
     functions: ['setup', 'draw', 'applyMappings', 'windowResized'] },
   { file: 'steps/step11.js', title: 'Real hardware',
-    about: 'Each card simulates a sensor until the Raspberry Pi sends readings. Open "Wiring" to connect the real part.',
-    globals: ['PROPS', 'SMOOTHING'],
-    functions: ['setup', 'draw', 'applyMappings', 'windowResized'] },
+    about: 'Simulated sensors, now from the Raspberry Pi: each card turns LIVE when the real part sends readings. Open "Wiring" to connect it.',
+    globals: ['SMOOTHING', 'r', 'g', 'b', 'a', 'size', 'x', 'bright'],
+    functions: ['setup', 'draw', 'windowResized'] },
 ].filter(s => !s.hidden);
 
 const pageParams = new URLSearchParams(location.search);
