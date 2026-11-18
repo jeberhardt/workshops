@@ -106,6 +106,7 @@ const SLIDES = [
   { id: 'alternatives', title: 'Other ways to build it' },
   { id: 'install', title: 'Leaving it alone in public' },
   { id: 'resources', title: 'Keep going' },
+  { id: 'challenge', title: 'Challenge · close the loop' },
 ];
 
 // The order of the menu and of ‹ ›: slide ids and step files, mixed.
@@ -119,7 +120,7 @@ const ORDER = [
   'fullscreen', 'break', 'inputs', 'proximity', 'smoothing', 'smoothing-code', 'inputs-more',
   'outputs', 'led', 'haptic',
   'steps/step12.js',
-  'outputs-more', 'boards', 'displays', 'sprint', 'alternatives', 'install', 'resources',
+  'outputs-more', 'boards', 'displays', 'sprint', 'alternatives', 'install', 'resources', 'challenge',
 ];
 
 // Everything in the menu, in ORDER: { slide } or { step }, each with its label.

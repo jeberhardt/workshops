@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 35: Challenge · close the loop</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="challenge" style="background:#FF7A45;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:40px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#15131F;text-transform:uppercase;letter-spacing:2px">Challenge · close the loop</p>
+<h1 style="font-size:96px;font-weight:700;line-height:1.05;color:#15131F">Sensor → screen → sound.</h1>
+</div>
+<div style="display:flex;gap:64px">
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;line-height:1.4;color:#15131F;border-top:3px solid #15131F;padding:24px 0px 0px 0px"><b>1 · An input moves something.</b> Walk towards the distance sensor and the shape slides across the screen.</p>
+<p style="font-size:32px;line-height:1.4;color:#15131F;border-top:3px solid #15131F;padding:24px 0px 0px 0px"><b>2 · Something happens.</b> The shape reaches the other side of the screen.</p>
+<p style="font-size:32px;line-height:1.4;color:#15131F;border-top:3px solid #15131F;padding:24px 0px 0px 0px"><b>3 · The Pi answers.</b> The sketch sends a message back, and the buzzer goes off or the NeoPixels light up.</p>
+</div>
+<div style="width:820px;display:flex;flex-direction:column;justify-content:center;background:#15131F;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#F3EFE6;white-space:nowrap">// Start from the Real hardware step.<br>let beeped = false;   // at the top<br><br>// in draw(), after x is worked out:<br>if (x &gt; 0.8 &amp;&amp; !beeped) {<br>&#160;&#160;sendToHardware({ beep: { hz: 880, ms: 300 } });<br>&#160;&#160;beeped = true;      // only once<br>}<br>if (x &lt; 0.5) {<br>&#160;&#160;beeped = false;     // back again: ready<br>}</p>
+</div>
+</div>
+<aside>Without beeped, the sketch would send a beep 60 times a second for as long as the shape stays on the right. The gap between 0.8 and 0.5 stops it from beeping over and over when someone stands right at the edge. Try your own versions: a different input (the button, the light sensor), a different event (the shape gets very small, the room goes dark), or a different output ({ pixels: [255, 0, 0] } turns the NeoPixels red).</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>
