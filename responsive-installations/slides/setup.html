@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 7: Part 1 · Set up the Pi</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="setup" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Part 1 · Set up the Pi</h2>
+<div style="display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;gap:40px;align-items:start">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:44px;color:#FF7A45;width:96px">01</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">Flash Raspberry Pi OS with Raspberry Pi Imager</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Set Wi-Fi, a username and SSH in the settings before you write the card.</p>
+</div>
+</div>
+<div style="display:flex;gap:40px;align-items:start">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:44px;color:#FF7A45;width:96px">02</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">Boot, then update</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#6FD3C1">sudo apt update &amp;&amp; sudo apt full-upgrade</p>
+</div>
+</div>
+<div style="display:flex;gap:40px;align-items:start">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:44px;color:#FF7A45;width:96px">03</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">Install the bridge’s one dependency</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#6FD3C1">sudo apt install python3-websockets</p>
+</div>
+</div>
+<div style="display:flex;gap:40px;align-items:start">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:44px;color:#FF7A45;width:96px">04</p>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">Serve your sketch folder, then open localhost:8000 in Chromium</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#6FD3C1">python3 -m http.server 8000</p>
+</div>
+</div>
+</div>
+<aside>To save time, consider pre-flashing cards. gpiozero ships with Raspberry Pi OS, so websockets is the only install. Have a known-good sketch folder ready (index.html + sketch.js) for people to copy.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

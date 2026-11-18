@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 14: Wire a proximity sensor</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="wire-proximity" style="background:#F3EFE6;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">Wire a proximity sensor</h2>
+<div style="display:flex;gap:64px;flex:1">
+<div style="width:760px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:30px;line-height:1.4;color:#15131F"><b>VCC</b> to 5V (pin 2), <b>GND</b> to ground</p>
+<p style="font-size:30px;line-height:1.4;color:#15131F"><b>Trig</b> to GPIO 23 (pin 16)</p>
+<p style="font-size:30px;line-height:1.4;color:#15131F"><b>Echo</b> to GPIO 24 (pin 18) through a 1kΩ + 2kΩ divider</p>
+<div style="display:flex;flex-direction:column;background:#15131F;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6">from gpiozero import DistanceSensor<br>from time import sleep<br><br>sensor = DistanceSensor(echo=24, trigger=23)<br>while True:<br>&#160;&#160;&#160;&#160;print(f"{sensor.distance * 100:.0f} cm")<br>&#160;&#160;&#160;&#160;sleep(0.1)</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+<img src="img/7e660718191c34f59cb7012d02a7c9dd.png" alt="Breadboard diagram: a Raspberry Pi 3 beside a breadboard and an HC-SR04 sensor. A red wire runs from 5V to the sensor's VCC, a yellow wire from GPIO 23 to Trig, and a black wire from the sensor's GND to the ground rail. A green wire takes Echo to row 13; a 1k resistor joins rows 13 and 17, an orange wire takes row 17 to GPIO 24, and a 2k resistor joins row 17 to row 21, which is jumpered to ground" style="width:840px;height:640px;object-fit:contain;background:#FFFFFF;border-radius:16px;padding:24px">
+</div>
+</div>
+<aside>Run the test and move your hand towards the sensor: the number should drop as you get closer. The HC-SR04 runs on 5V, so its Echo pin sends back 5V, which can damage a GPIO pin. The divider fixes that: Echo goes through the 1kΩ resistor to GPIO 24, and a 2kΩ resistor runs from GPIO 24 to ground, bringing the signal down to about 3.3V. Trig can connect straight to GPIO 23. In the diagram: red is 5V, black is ground, yellow is Trig, green is Echo, and orange is GPIO 24. Readings beyond about 1 m get unreliable, and soft clothing absorbs the sound, so test with real people.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

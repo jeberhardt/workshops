@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 23: Smoothing in code</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="smoothing-code" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Smoothing in code</h2>
+<div style="display:flex;gap:64px">
+<div style="width:900px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;background:#221F33;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#F3EFE6;white-space:nowrap">let target = 0, near = 0;<br><br>ws.onmessage = (e) =&gt; {<br>&#160;&#160;if (e.data.startsWith("near:"))<br>&#160;&#160;&#160;&#160;target = float(e.data.slice(5));<br>};<br><br>function draw() {<br>&#160;&#160;// move 10% of the way there, every frame<br>&#160;&#160;near = lerp(near, target, 0.1);<br>&#160;&#160;// ...draw with near, never target<br>}</p>
+</div>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Store the latest reading as a <span style="color:#6FD3C1">target</span>. Ease toward it in <span style="color:#6FD3C1">draw()</span>, so motion stays smooth even when messages arrive unevenly.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#221F33;padding:28px;border-radius:16px;border:3px solid #FF7A45">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">lerp (start here)</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">One line. Tune the amount between 0.02 and 0.5.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#221F33;padding:28px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Moving average</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Average the last N readings. Easy to reason about.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#221F33;padding:28px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Median</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Middle of the last 5. Throws out single spikes.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#221F33;padding:28px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Dead zone</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Ignore tiny changes, so an empty room stays still.</p>
+</div>
+</div>
+</div>
+<aside>Have everyone try 0.5, 0.1 and 0.02 on their proximity sketch and feel the difference. Techniques stack: a median to kill spikes, then lerp for calm, then a dead zone for stillness. The same pattern works for the slider. lerp per frame depends on frame rate; that’s fine for a fixed installation.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+/* =================================================================
+   slides.css — THE WORKSHOP SLIDES (slides/*.html)
+   -----------------------------------------------------------------
+   Each slide is one 1920 × 1080 <section>. slide.js scales it to
+   fit the window. Speaker notes are in <aside> and stay hidden.
+   ================================================================= */
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; overflow: hidden; background: #15131f; }
+
+section {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  color: #15131f;
+}
+
+section h1, section h2, section h3, section p, section ul, section table { margin: 0; }
+section ul { padding-left: 1.1em; }
+section li + li { margin-top: 8px; }
+section b { font-weight: 700; }
+section a { color: inherit; }
+
+/* Tables: rows with a thin line between them (the pin table styles its own cells) */
+section table { width: 100%; border-collapse: collapse; }
+section table:not(.plain) th,
+section table:not(.plain) td { padding: 14px 24px 14px 0; text-align: left; vertical-align: top; }
+section table:not(.plain) th { font-weight: 600; }
+section table:not(.plain) tr + tr td { border-top: 1px solid rgba(128, 128, 128, .3); }
+
+/* Speaker notes */
+section aside { display: none; }
+
+/* Shapes */
+x-shape { display: block; flex: none; }
+x-shape[kind="ellipse"] { border-radius: 50%; }
+x-shape[kind="arrow-right"] { clip-path: polygon(0 35%, 60% 35%, 60% 0, 100% 50%, 60% 100%, 60% 65%, 0 65%); }
+
+/* Shown in place of a picture that hasn't been added to slides/img/ yet */
+.missing-img {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 32px; border: 3px dashed #b8af9e; border-radius: 16px;
+  font-size: 22px; line-height: 1.4; color: #6b6678; background: #fbf9f4;
+}

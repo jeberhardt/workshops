@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 5: How the pieces talk</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="stack" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">How the pieces talk</h2>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">01</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Input</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Button, knob or sensor</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">02</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">GPIO</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">The Pi’s header pins</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:28px;border-radius:16px;border:3px solid #FF7A45">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">03</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Bridge</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Python + gpiozero, sends WebSocket messages</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">04</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Sketch</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">p5.js in Chromium</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">05</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Output</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Screen or projector</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#BDB8CC">Everything runs on the Pi. A browser can’t read pins, so the <span style="color:#FF7A45">bridge</span> translates presses into messages.</p>
+<aside>This is the mental model for the whole workshop. Each hands-on part builds one box. The bridge (highlighted) is the bit most people haven’t seen before.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

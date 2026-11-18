@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 32: Other ways to build it</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="alternatives" style="background:#F3EFE6;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">Other ways to build it</h2>
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C2410C;text-transform:uppercase;letter-spacing:2px">Instead of the Pi’s pins</p>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:24px;background:#FBF9F4;padding:24px 32px 24px 24px;border:1px solid #DDD6C8;border-radius:16px">
+<img src="img/07255a48f04a87808eee7245a20bcc19.png" alt="An ESP32 development board: a black board with a silver Wi-Fi module, a USB-C port and two rows of header pins" style="width:200px;height:140px;flex:none;object-fit:contain;background:#FFFFFF;border-radius:12px;padding:8px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.15;color:#15131F">ESP32</h3>
+<p style="font-size:26px;line-height:1.4;color:#4A4658">Wi-Fi built in and runs on a battery. Put sensors anywhere in the room.</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:24px;background:#FBF9F4;padding:24px 32px 24px 24px;border:1px solid #DDD6C8;border-radius:16px">
+<img src="img/178538a47b12e199b8c8f1f4cbe83f0e.png" alt="An Arduino Uno: a blue board with a USB-B port, a round power jack and rows of header sockets along both edges" style="width:200px;height:140px;flex:none;object-fit:contain;background:#FFFFFF;border-radius:12px;padding:8px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.15;color:#15131F">Arduino</h3>
+<p style="font-size:26px;line-height:1.4;color:#4A4658">Boots instantly, reads 5V and analog sensors directly. Plugs into the Pi by USB.</p>
+</div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C2410C;text-transform:uppercase;letter-spacing:2px">Instead of p5.js</p>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.15;color:#15131F">Processing</h3>
+<p style="font-size:26px;line-height:1.4;color:#4A4658">p5.js’s older sibling, in Java. Same setup() and draw(), and it runs on the Pi.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.15;color:#15131F">TouchDesigner</h3>
+<p style="font-size:26px;line-height:1.4;color:#4A4658">Node-based live visuals and projection mapping. Needs a Mac or PC.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:36px;font-weight:600;line-height:1.15;color:#15131F">Unity</h3>
+<p style="font-size:26px;line-height:1.4;color:#4A4658">A 3D game engine for immersive worlds and big screens. Needs a Mac or PC.</p>
+</div>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.4;color:#1F8A77">Mix and match: any board can feed any tool. The visuals don’t even need to be in the same place: they can run on a separate computer, in another room or another city, as long as the messages can reach it.</p>
+<aside>Not hands-on, just a map of where people can go next. Boards: an ESP32 is a cheap microcontroller with Wi-Fi and Bluetooth, good for sensors spread through a space or hidden in something battery-powered. An Arduino is the simplest and most robust option: it starts in a second, has analog inputs, and works with 5V sensors without a voltage divider. Both run Arduino code (the ESP32 can also run MicroPython), and neither can draw visuals on its own, so they still send their readings to a computer. Visual tools: Processing is the closest step from p5.js and reads an Arduino's serial port directly. TouchDesigner is the standard in a lot of installation and projection work; it's free for non-commercial use with some limits, and needs a decent graphics card. Unity suits 3D, game-like pieces and VR. TouchDesigner and Unity don't run on a Pi. All of them can receive messages over serial, OSC or WebSockets, so the sensor side people learned today carries straight over. Because the hardware and the visuals only share messages, they can live apart: sensors in a doorway with a projector across the room, a Pi in a sculpture talking to a TouchDesigner PC backstage, or even a piece in one city reacting to visitors in another. On the same network that just works; across the internet it needs a server in the middle (for example a hosted WebSocket or OSC relay), and a bit more care with latency and security. The "Beyond the Pi" footnote slide compares the boards in more detail.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 15: Wire a light sensor</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="wire-light" style="background:#f3efe6">
+  <h2 style="position:absolute; top:128px; left:128px; width:1664px; font-family:'Space Grotesk', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.1; color:#15131f">Wire a light sensor</h2>
+  <div style="position:absolute; top:255px; left:128px; width:760px; display:flex; flex-direction:column; gap:28px">
+    <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:30px; line-height:1.4; color:#15131f"><b>ADS1115</b> to 3.3V, ground, SDA (pin 3) and SCL (pin 5)</p>
+    <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:30px; line-height:1.4; color:#15131f"><b>Light sensor</b> from 3.3V to A0, <b>10kΩ</b> from A0 to ground</p>
+    <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:24px; line-height:1.4; color:#4a4658">Turn on I2C first: sudo raspi-config, then Interface Options, then I2C.</p>
+    <div style="display:flex; flex-direction:column; padding:32px; background:#15131f; border-radius:16px">
+      <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; line-height:1.35; color:#f3efe6">import time, board<br>import adafruit_ads1x15.ads1115 as ADS<br>from adafruit_ads1x15.analog_in import AnalogIn<br><br>ads = ADS.ADS1115(board.I2C())<br>light = AnalogIn(ads, ADS.P0)<br>while True:<br>&nbsp;&nbsp;&nbsp;&nbsp;print(f"{light.voltage:.2f} V")<br>&nbsp;&nbsp;&nbsp;&nbsp;time.sleep(0.1)</p>
+    </div>
+  </div>
+  <img src="img/9b0f3cd3f097d2c72ddb826ae90289de.png" alt="Breadboard diagram, with a photo of the blue ADS1115 breakout board beside it and each pin name lined up with its pin on the photo: a Raspberry Pi 3 beside a breadboard with an ADS1115 board in column J. Red wires take 3.3V to the power rail and on to the ADS1115's VDD and the photoresistor; a black wire runs from the GND pin at the bottom of the Pi's header to the ground rail, and another takes ground from the rail to the ADS1115's GND; yellow is SDA to GPIO 2 and blue is SCL to GPIO 3. The photoresistor spans rows 14 and 17, a 10k resistor spans rows 17 and 21 with row 21 jumpered" style="position:absolute; top:284.2px; left:901.07px; width:840px; height:640px; background:#ffffff; border-radius:16px; object-fit:contain">
+  <aside>The Pi has no analog inputs, so the ADS1115 converts the light sensor's voltage into a number and sends it over I2C. The photoresistor and the 10kΩ resistor form a voltage divider: more light means lower resistance, so the voltage at A0 rises. Cover the sensor with your hand and the reading should drop. In the diagram: red is 3.3V, black is ground (from header pin 39, the bottom GND pin, which keeps it clear of the other wires; every GND pin on the Pi is connected, so any of them works), yellow is SDA, blue is SCL, and orange carries the light reading to A0. Fritzing has no ADS1115 part, so the diagram uses a labelled stand-in. Beside it is a photo of the actual blue breakout, with each pin name lined up with its pin, so people can match the diagram to the board in their hand. Install the library first: pip install adafruit-circuitpython-ads1x15. Run i2cdetect -y 1 to check the board shows up at address 48. [Check the import lines against the library version on the workshop image; newer releases changed how channels are named.]</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

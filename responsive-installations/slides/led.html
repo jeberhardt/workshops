@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 26: Output 1 · LED</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="led" style="background:#F3EFE6;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">Output 1 · LED</h2>
+<div style="display:flex;gap:64px;flex:1">
+<div style="width:520px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;line-height:1.4;color:#15131F">Long leg through a 330Ω resistor to GPIO 18. Short leg to ground.</p>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">PWMLED gives you brightness, not just on and off.</p>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;border:3px dashed #B8AF9E;border-radius:16px;padding:32px">
+<p style="font-size:24px;line-height:1.4;color:#4A4658;text-align:center">[Fritzing diagram: LED + resistor on GPIO 18]</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;background:#15131F;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">from gpiozero import PWMLED<br>led = PWMLED(18)<br><br>async def handler(ws):&#160;&#160;# replaces the old handler<br>&#160;&#160;&#160;&#160;clients.add(ws)<br>&#160;&#160;&#160;&#160;async for msg in ws:<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;if msg == "led:toggle": led.toggle()<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;elif msg.startswith("glow:"): led.value = float(msg[5:])<br>&#160;&#160;&#160;&#160;clients.discard(ws)</p>
+</div>
+<div style="display:flex;flex-direction:column;background:#15131F;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">// in setup():<br>createButton("Toggle LED").mousePressed(() =&gt; ws.send("led:toggle"));<br>const glow = createSlider(0, 1, 0, 0.01);<br>glow.input(() =&gt; ws.send("glow:" + glow.value()));</p>
+</div>
+</div>
+</div>
+<aside>The new handler listens for messages until the browser disconnects, then tidies up. Never skip the resistor — without it the LED (and possibly the pin) burns out. Once it works, swap the HTML button for anything in the sketch: a click on a shape, a timer, or the proximity value.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

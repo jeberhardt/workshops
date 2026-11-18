@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 16: Part 3 · Bridge to the browser</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="bridge" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Part 3 · Bridge to the browser</h2>
+<div style="display:flex;gap:64px">
+<div style="width:480px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">The bridge watches the pin and broadcasts “press” to every open browser.</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Save it as <span style="color:#6FD3C1">bridge.py</span> and leave it running:</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.4;color:#6FD3C1">python3 bridge.py</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;background:#221F33;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">import asyncio, websockets<br>from gpiozero import Button<br><br>button = Button(17)<br>clients = set()<br><br>async def handler(ws):<br>&#160;&#160;&#160;&#160;clients.add(ws)<br>&#160;&#160;&#160;&#160;await ws.wait_closed()<br>&#160;&#160;&#160;&#160;clients.discard(ws)<br><br>async def main():<br>&#160;&#160;&#160;&#160;loop = asyncio.get_running_loop()<br>&#160;&#160;&#160;&#160;send = lambda: websockets.broadcast(clients, "press")<br>&#160;&#160;&#160;&#160;button.when_pressed = lambda: loop.call_soon_threadsafe(send)<br>&#160;&#160;&#160;&#160;async with websockets.serve(handler, "localhost", 8765):<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;await asyncio.Future()<br><br>asyncio.run(main())</p>
+</div>
+</div>
+<aside>gpiozero calls when_pressed from its own thread, so call_soon_threadsafe hands the message back to the asyncio loop. Test this script on the workshop Pis beforehand. To test from a laptop on the same network, change "localhost" to "0.0.0.0".</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

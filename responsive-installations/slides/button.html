@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 12: Part 2 · Wire a button</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="button" style="display:flex; flex-direction:column; gap:48px; padding:128px; background:#f3efe6">
+  <h2 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.1; color:#15131f">Part 2 · Wire a button</h2>
+  <div style="display:flex; flex-direction:row; gap:64px; flex:1">
+    <div style="width:760px; display:flex; flex-direction:column; gap:32px">
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:32px; line-height:1.4; color:#15131f"><b>One leg</b> to GPIO 17 (physical pin 11)</p>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:32px; line-height:1.4; color:#15131f"><b>Other leg</b> to ground (physical pin 9)</p>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:32px; line-height:1.4; color:#4a4658">No resistor needed: gpiozero turns on the Pi’s internal pull-up for you.</p>
+      <div style="display:flex; flex-direction:column; padding:32px; background:#15131f; border-radius:16px">
+        <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; line-height:1.35; color:#f3efe6">from gpiozero import Button<br>from signal import pause<br><br>b = Button(17)<br>b.when_pressed = lambda: print("press")<br>pause()</p>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; flex:1">
+      <img src="img/ed64297eb02b75ffce4c897f1b970d12.png" alt="Breadboard diagram: a Raspberry Pi 3 sits beside the breadboard with its header facing it. An orange wire runs from GPIO 17 to row 5, a black wire runs from a ground pin to the ground rail, a short black jumper runs from the rail to row 3, and a push button bridges rows 3 and 5" style="width:840px; height:640px; background:#ffffff; border-radius:16px; object-fit:contain">
+    </div>
+  </div>
+  <aside>Run the test script and press the button — “press” should print in the terminal. If nothing happens, check the wire is on physical pin 11, not GPIO 11. Pin numbering is the most common trip-up. In the diagram the orange wire is GPIO 17 and goes to row 5. Ground goes to the breadboard's ground rail first, then a short black jumper takes it to row 3. The button sits across rows 3 and 5, so pressing it joins the two rows. Using the rail now pays off later: the other inputs can share the same ground.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 21: Input 3 · Proximity</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="proximity" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Input 3 · Proximity</h2>
+<div style="display:flex;gap:64px;flex:1">
+<div style="width:560px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">Now the input is the audience: how close someone is, many times a second.</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">HC-SR04: VCC to 5V, Trig to GPIO 23, GND to ground. Echo sends 5V, so it reaches GPIO 24 through a 1kΩ + 2kΩ voltage divider.</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Run it raw first and watch it shimmer. That’s the problem the next two slides fix.</p>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;border:3px dashed #5A5570;border-radius:16px;padding:32px">
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC;text-align:center">[Fritzing diagram: HC-SR04 + voltage divider]</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;background:#221F33;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">from gpiozero import DistanceSensor<br>sensor = DistanceSensor(echo=24, trigger=23, max_distance=2)<br><br># inside stream(), next to the slider:<br>near = 1 - sensor.distance / 2&#160;&#160;# 0 = 2 m away, 1 = touching<br>websockets.broadcast(clients, f"near:{near:.3f}")</p>
+</div>
+<div style="display:flex;flex-direction:column;background:#221F33;padding:28px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">let near = 0;&#160;&#160;// 0 = nobody, 1 = right up close<br>ws.onmessage = (e) =&gt; {<br>&#160;&#160;if (e.data.startsWith("near:"))<br>&#160;&#160;&#160;&#160;near = float(e.data.slice(5));<br>};<br><br>// in draw(): closer means brighter and bigger<br>background(0, 0, near * 100);<br>circle(width / 2, height / 2, near * 900);</p>
+</div>
+</div>
+</div>
+<aside>The Python block runs inside the same stream() loop as the slider. Sending “near” as 0–1 keeps the p5 side identical whatever sensor you use. sensor.distance is in metres, capped at max_distance. The voltage divider is not optional: 5V on a GPIO pin can damage the Pi. gpiozero already averages a few readings internally, but the output still jitters and spikes, which sets up the smoothing slides. For installations: several HC-SR04s pointing the same way can hear each other’s pings, and soft clothing absorbs sound, so test with real people.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 13: Use a different pin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="button-pin" style="background:#F3EFE6;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">Use a different pin</h2>
+<div style="display:flex;gap:64px;flex:1">
+<div style="width:760px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:30px;line-height:1.4;color:#15131F"><b>1. Move the wire</b> from GPIO 17 to any free GPIO pin. The ground wire stays where it is.</p>
+<p style="font-size:30px;line-height:1.4;color:#15131F"><b>2. Change the number</b> in the code to match. Use the GPIO number, not the pin’s position on the header.</p>
+<div style="display:flex;flex-direction:column;background:#15131F;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6">b = Button(27)&#160;&#160;&#160;&#160;# was Button(17)<br><br># or count pins along the header:<br>b = Button("BOARD13")</p>
+</div>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Lost? Type <b>pinout</b> in the Pi’s terminal to see a map of every pin.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<table class="plain" style="width:100%;border-collapse:collapse;font-size:30px;color:#15131F">
+<tr><th style="text-align:left;padding:12px 24px;background:#15131F;color:#F3EFE6;font-weight:600">GPIO number</th><th style="text-align:left;padding:12px 24px;background:#15131F;color:#F3EFE6;font-weight:600">Header pin</th></tr>
+<tr><td style="padding:12px 24px;background:#FFE4D6;font-weight:700">17 (today)</td><td style="padding:12px 24px;background:#FFE4D6;font-weight:700">11</td></tr>
+<tr><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">27</td><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">13</td></tr>
+<tr><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">22</td><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">15</td></tr>
+<tr><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">5</td><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">29</td></tr>
+<tr><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">6</td><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">31</td></tr>
+<tr><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">26</td><td style="padding:12px 24px;border-bottom:1px solid #DDD6C8">37</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Already in use today: GPIO 2 and 3 (light sensor), 10 (LEDs), 13 (buzzer), 23 and 24 (proximity sensor).</p>
+</div>
+</div>
+<aside>The Pi has two numbering systems, and mixing them up is the most common mistake. The GPIO number is the chip's name for the pin, and it's what gpiozero expects by default. The header pin is its physical position, counted from pin 1 at the corner. GPIO 17 sits at header pin 11, for example. gpiozero also accepts "BOARD11"-style names if counting along the header is easier. Change the number everywhere it appears: in the test script and in bridge.py. For a second button, wire it to another free pin and add a second Button with its own number. The pins in the table are free on every Pi since the Pi 2 and aren't used by today's other parts. Avoid GPIO 2 and 3 for buttons even when they look free: they have built-in pull-up resistors for I2C.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

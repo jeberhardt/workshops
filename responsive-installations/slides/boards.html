@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 29: Beyond the Pi: other boards</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="boards" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45;text-transform:uppercase;letter-spacing:2px">Footnote</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Beyond the Pi: other boards</h2>
+</div>
+<table style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;color:#F3EFE6">
+<tr><th style="width:22%;text-align:left;color:#BDB8CC"></th><th style="width:26%;text-align:left;color:#FF7A45">Pi pins</th><th style="width:26%;text-align:left;color:#FF7A45">Arduino Uno</th><th style="width:26%;text-align:left;color:#FF7A45">ESP32</th></tr>
+<tr><td style="color:#BDB8CC">Reads analog</td><td>With an MCP3008</td><td>Yes, 6 inputs</td><td>Yes, built in</td></tr>
+<tr><td style="color:#BDB8CC">Logic level</td><td>3.3V</td><td>5V</td><td>3.3V</td></tr>
+<tr><td style="color:#BDB8CC">Talks to the Pi</td><td>Directly</td><td>Over a USB cable</td><td>Over Wi-Fi</td></tr>
+<tr><td style="color:#BDB8CC">Best for</td><td>A few sensors in one piece</td><td>5V sensors, lots of analog, tight timing</td><td>Wireless sensors spread through a space</td></tr>
+</table>
+<p style="font-size:32px;line-height:1.4;color:#6FD3C1">Whatever the board, it sends the same messages, so your sketch never changes.</p>
+<aside>Not hands-on today, just so people know the option exists. The Pi stays the brain: it runs the bridge and the sketch. Extra boards are just more hands. An Arduino prints lines over its USB cable and the bridge reads them; an ESP32 connects over Wi-Fi and sends messages to the bridge like the sketch does. Either way the messages look the same, so the p5.js side doesn’t change. Arduino Uno is 5V, so 5V sensors like the HC-SR04 connect without a voltage divider. The ESP32’s ADC is noisier and less linear than a dedicated chip, so smoothing matters even more there.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

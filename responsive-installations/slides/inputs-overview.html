@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 8: Inputs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="inputs-overview" style="display:flex; flex-direction:column; gap:48px; padding:128px; background:#f3efe6">
+  <h2 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.1; color:#15131f">Inputs</h2>
+  <div style="display:flex; flex-direction:row; gap:32px">
+    <div style="display:flex; flex-direction:column; gap:20px; flex:1">
+      <img src="img/2e71a9d9212cbb758b82bcb479624f4d.png" alt="A small black tactile push button with four metal legs" style="width:533px; height:400px; background:#ffffff; border-radius:16px; object-fit:contain">
+      <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; color:#c2410c">01 · ON / OFF</p>
+      <h3 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:44px; font-weight:600; line-height:1.15; color:#15131f">Button</h3>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:28px; line-height:1.4; color:#4a4658">Pressed or not. The simplest thing a visitor can do.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px; flex:1">
+      <img src="img/d18850343c24a16a2eb176f2dcd4f014.png" alt="An HC-SR04 ultrasonic sensor: a blue board with two silver transducers and four header pins" style="width:533px; height:400px; background:#ffffff; border-radius:16px; object-fit:contain">
+      <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; color:#c2410c">02 · DISTANCE</p>
+      <h3 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:44px; font-weight:600; line-height:1.15; color:#15131f">Proximity sensor</h3>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:28px; line-height:1.4; color:#4a4658">How close someone is, many times a second.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px; flex:1">
+      <img src="img/9aa9fd6c26fd144a9c15b60ca3c2f384.png" alt="A photoresistor: a small round red-orange disc with a zigzag pattern on top and two long wire legs" style="width:533px; height:400px; background:#ffffff; border-radius:16px; object-fit:contain">
+      <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; color:#c2410c">03 · ANALOG</p>
+      <h3 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:44px; font-weight:600; line-height:1.15; color:#15131f">Light sensor</h3>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:28px; line-height:1.4; color:#4a4658">How much light falls on it, smoothly from dark to bright.</p>
+    </div>
+  </div>
+  <aside>Hold up each part as you name it. Each one adds a kind of data: the button is a single on/off, the HC-SR04 ultrasonic sensor turns a person's distance into a number, and the photoresistor (LDR) gives a continuous analog value. The Pi has no analog inputs, so the LDR goes through a 10kΩ voltage divider into an ADS1115 converter over I2C (GPIO 2 and 3). In an installation, a shadow or a hand over the LDR becomes the interaction.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

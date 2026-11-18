@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 20: From one bit to the whole room</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="inputs" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45;text-transform:uppercase;letter-spacing:2px">Inputs</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">From one bit to the whole room</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:end">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#221F33;padding:40px;border-radius:16px">
+<div style="height:48px;background:#FF7A45;border-radius:8px"></div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#6FD3C1">Level 1</p>
+<h3 style="font-size:44px;font-weight:600;line-height:1.15;color:#F3EFE6">Button</h3>
+<p style="font-size:32px;line-height:1.4;color:#BDB8CC">On or off</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Built before the break</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#221F33;padding:40px;border-radius:16px">
+<div style="height:160px;background:#FF7A45;border-radius:8px"></div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#6FD3C1">Level 2</p>
+<h3 style="font-size:44px;font-weight:600;line-height:1.15;color:#F3EFE6">Proximity</h3>
+<p style="font-size:32px;line-height:1.4;color:#BDB8CC">A live stream about the audience</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">The input becomes people</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#221F33;padding:40px;border-radius:16px">
+<div style="height:280px;background:#FF7A45;border-radius:8px"></div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#6FD3C1">Level 3</p>
+<h3 style="font-size:44px;font-weight:600;line-height:1.15;color:#F3EFE6">Light sensor</h3>
+<p style="font-size:32px;line-height:1.4;color:#BDB8CC">A number from 0 to 1 about the space</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">The input becomes the room · needs an ADS1115 chip</p>
+</div>
+</div>
+<aside>Each level sends richer data: a single event, then a continuous value the audience controls by coming closer, then a continuous value from the room itself: daylight, the house lights, a shadow passing over. The light sensor (LDR) is analog and the Pi has no analog inputs, so it reads through the ADS1115, as wired on the light sensor slide. The bars hint at how much information each one carries.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

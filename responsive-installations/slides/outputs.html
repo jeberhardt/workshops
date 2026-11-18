@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 25: Now the sketch talks back</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="outputs" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45;text-transform:uppercase;letter-spacing:2px">Outputs</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Now the sketch talks back</h2>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">01</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Sketch</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">A click or slider in p5.js sends a message</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:32px;border-radius:16px;border:3px solid #FF7A45">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">02</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">Bridge</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Python reads it and sets a pin</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">03</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">GPIO</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">On, off, or pulsed (PWM)</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:24px;background:#6FD3C1"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#221F33;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">04</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">The world</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">An LED glows, a motor buzzes</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#BDB8CC">Same WebSocket, opposite direction. Combine both and a visitor walking up can feel the piece respond.</p>
+<aside>This flips the stack slide around. The bridge already has an open connection to the browser; we just start listening on it as well as sending.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

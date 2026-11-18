@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 30: The screen doesn’t have to be here</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="displays" style="background:#F3EFE6;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C2410C;text-transform:uppercase;letter-spacing:2px">Footnote</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">The screen doesn’t have to be here</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C2410C">Same Pi</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Chromium in kiosk mode</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Today’s setup. One box, fewest parts to fail.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C2410C">Same network</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">A bigger computer</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">A laptop or mini PC drives the projector. The Pi just handles sensors.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#C2410C">Same network</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Visitors’ phones</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Scan a QR code and every phone in the crowd reacts at once.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#15131F;padding:32px;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#FF7A45">Anywhere</p>
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#F3EFE6">A screen in another city</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Pi and screen both connect out to a relay on the internet. No router setup.</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#15131F">Or skip the browser: send the same messages to <b>TouchDesigner</b>, <b>Unity</b> or <b>Processing</b>.</p>
+<aside>Not hands-on, just possibilities. Same network: serve the bridge on 0.0.0.0 and point the sketch at ws://[pi-ip]:8765 instead of localhost. Phones: the Pi serves the page; the venue network must let devices see each other, so bring your own router. Anywhere: the Pi and the remote display both connect outward to a relay — a small hosted WebSocket server, an MQTT broker (many support browsers over secure WebSockets), or a private network like Tailscale. Because both sides connect out, nobody touches the venue’s router. Expect some delay, use encrypted connections (wss://), and don’t rely on public brokers for anything private. TouchDesigner, Unity and Processing usually take the messages as OSC.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 33: Leaving it alone in public</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="install" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Leaving it alone in public</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#221F33;padding:40px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">Boot into the piece</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Launch Chromium with --kiosk at startup, cursor hidden.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#221F33;padding:40px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">Restart on failure</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Run the bridge as a systemd service with Restart=always.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#221F33;padding:40px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">Survive pulled plugs</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Turn on the overlay file system in raspi-config so the card stays read-only.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#221F33;padding:40px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">Build for mashing</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Arcade buttons, strain-relieved cables, and bounce_time in gpiozero.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#221F33;padding:40px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">Plan for the night</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Rain, cold and condensation: enclose it and do a test run outside.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#221F33;padding:40px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#FF7A45">Leave a way in</h3>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">Keep SSH on so you can fix it without opening the case.</p>
+</div>
+</div>
+<aside>Good place to share a story from a real install: [your own Nuit Blanche or brand-activation anecdote]. Brand clients will also ask about uptime and who to call — have an answer.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

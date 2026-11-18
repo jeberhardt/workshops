@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 28: More outputs to explore</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="outputs-more" style="background:#F3EFE6;color:#15131F;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">More outputs to explore</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">LED strips</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Addressable pixels, each its own colour</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Relay</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Switch lamps, fans or a fog machine</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">DC motor</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Spinning at any speed, through a driver</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Servo</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Point to an angle and hold it</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Stepper motor</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Precise, repeatable turns for slow kinetics</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Solenoid</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">A sharp knock, tap or strike</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Sound</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">A buzzer’s tones, or speakers from the sketch</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Fan</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Moving air across skin or fabric</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Small display</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">OLED or e-ink text on the object itself</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">Projector</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">The sketch on walls, buildings, sculpture</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">DMX lighting</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Drive venue stage lights via USB-DMX</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FBF9F4;padding:32px;border:1px solid #DDD6C8;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;line-height:1.2;color:#15131F">OSC or MIDI</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A4658">Hand off to TouchDesigner, Ableton, a lighting desk</p>
+</div>
+</div>
+<aside>Same pattern as the LED and haptic motor: the sketch sends a message, Python drives the hardware. Anything with a motor or a coil (DC motor, solenoid, fan) needs a transistor or driver and its own power, like the haptic motor. For relays, use pre-built low-voltage modules or smart plugs — never wire mains power in a workshop. LED strip libraries differ between the Pi 4 and Pi 5, so check before buying.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>

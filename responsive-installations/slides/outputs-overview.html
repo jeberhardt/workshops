@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide 9: Outputs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
+  <link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<section id="outputs-overview" style="display:flex; flex-direction:column; gap:48px; padding:128px; background:#f3efe6">
+  <h2 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.1; color:#15131f">Outputs</h2>
+  <div style="display:flex; flex-direction:row; gap:32px">
+    <div style="display:flex; flex-direction:column; gap:20px; flex:1">
+      <img src="img/5cfad9b42234f61d4dcbe0a6f28eec10.png" alt="Three round WS2812 NeoPixel boards side by side, each with one square colour LED" style="width:816px; height:400px; background:#ffffff; border-radius:16px; object-fit:contain">
+      <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; color:#c2410c">01 · LIGHT</p>
+      <h3 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:44px; font-weight:600; line-height:1.15; color:#15131f">LEDs</h3>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:28px; line-height:1.4; color:#4a4658">Three colour LEDs on one wire. The sketch sets each one’s colour and brightness.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:20px; flex:1">
+      <img src="img/79714c447ca41d1824ca2c9bd776b5de.png" alt="A small round black buzzer with a hole in the top and two metal pins" style="width:816px; height:400px; background:#ffffff; border-radius:16px; object-fit:contain">
+      <p style="font-family:'JetBrains Mono', 'Courier New', monospace; font-size:24px; color:#c2410c">02 · SOUND</p>
+      <h3 style="font-family:'Space Grotesk', Arial, sans-serif; font-size:44px; font-weight:600; line-height:1.15; color:#15131f">Buzzer</h3>
+      <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:28px; line-height:1.4; color:#4a4658">A tiny speaker that plays tones. The sketch picks the pitch and when it sounds.</p>
+    </div>
+  </div>
+  <aside>Inputs let the audience talk to the sketch; outputs let the piece answer in the room, not just on screen. The LEDs are three WS2812 NeoPixels chained together: 5V, ground, and one data line through a 330Ω resistor to GPIO 10 (SPI MOSI), driven by the adafruit-circuitpython-neopixel-spi library, which works on Pi 4 and Pi 5 without sudo. The buzzer is a small passive buzzer driven through a PN2222A transistor from GPIO 13, with a flyback diode across it, because it draws more current than a GPIO pin should supply. gpiozero's TonalBuzzer plays notes; it's loudest around 2 to 2.7 kHz.</aside>
+</section>
+<script src="slide.js"></script>
+</body>
+</html>
