@@ -1,10 +1,11 @@
 /* =================================================================
-   Step 10 — REAL HARDWARE
+   Step 10 — ANY INPUT → ANY PROPERTY
    -----------------------------------------------------------------
-   Step 9 plus one line: setupHardware() connects to the Raspberry Pi
-   over a WebSocket (hardware.js). Any input that receives readings
-   turns LIVE; the rest keep simulating. Each card's "Wiring" shows
-   how to connect the real part.
+   Step 9 wired three inputs to three properties by hand. Now every
+   property lives in one table, PROPS, and the panel's dropdowns choose
+   which input drives which. applyMappings() does step 9's
+   "stretch and smooth" for every pair. Inputs on the same property
+   are averaged.
    ================================================================= */
 
 // -----------------------------------------------------------------
@@ -18,10 +19,10 @@ const PROPS = {
   x:            { group: 'Circle',    label: 'Position X',        min: 0,    max: 1,    value: 0.5  }, // fraction of width
   y:            { group: 'Circle',    label: 'Position Y',        min: 0,    max: 1,    value: 0.5  }, // fraction of height
   size:         { group: 'Circle',    label: 'Size',              min: 0.03, max: 0.9,  value: 0.35 }, // fraction of the smaller side
-  hue:          { group: 'Circle',    label: 'Hue',               min: 0,    max: 360,  value: 200  },
-  saturation:   { group: 'Circle',    label: 'Saturation',        min: 0,    max: 100,  value: 80   },
-  brightness:   { group: 'Circle',    label: 'Brightness',        min: 0,    max: 100,  value: 95   },
-  opacity:      { group: 'Circle',    label: 'Opacity',           min: 0,    max: 100,  value: 100  },
+  r:            { group: 'Circle',    label: 'Red',               min: 0,    max: 255,  value: 48   },
+  g:            { group: 'Circle',    label: 'Green',             min: 0,    max: 255,  value: 177  },
+  b:            { group: 'Circle',    label: 'Blue',              min: 0,    max: 255,  value: 242  },
+  a:            { group: 'Circle',    label: 'Alpha',             min: 0,    max: 255,  value: 255  }, // 0 = invisible
   strokeWeight: { group: 'Circle',    label: 'Outline thickness', min: 0,    max: 30,   value: 0    },
 
   // --- the animation ---
@@ -29,7 +30,7 @@ const PROPS = {
   pulseAmount:  { group: 'Animation', label: 'Pulse amount',      min: 0,    max: 0.6,  value: 0.1  }, // how much the size breathes
   orbitSpeed:   { group: 'Animation', label: 'Orbit speed',       min: -3,   max: 3,    value: 0.6  }, // radians per second
   orbitRadius:  { group: 'Animation', label: 'Orbit radius',      min: 0,    max: 0.4,  value: 0    }, // fraction of the smaller side
-  hueDrift:     { group: 'Animation', label: 'Colour cycling',    min: 0,    max: 180,  value: 0    }, // degrees per second
+  colourSpeed:  { group: 'Animation', label: 'Colour cycling',    min: 0,    max: 0.5,  value: 0    }, // swings per second to the opposite colour
   jitter:       { group: 'Animation', label: 'Jitter',            min: 0,    max: 40,   value: 0    }, // pixels of shake
   trails:       { group: 'Animation', label: 'Trails',            min: 0,    max: 0.9,  value: 0    }, // 0 = none, 0.9 = long (higher leaves ghosts)
 };
@@ -43,17 +44,15 @@ const current = {};   // the live, smoothed value of every property
 // Animation clocks. We accumulate them so changing a speed never makes the circle jump.
 let pulsePhase = 0;
 let orbitAngle = 0;
-let hueOffset  = 0;
+let colourPhase = 0;
 
 
 function setup() {
   const stage = document.getElementById('stage');
   createCanvas(stage.clientWidth, stage.clientHeight).parent(stage);
-  colorMode(HSB, 360, 100, 100, 100);
 
   for (const key in PROPS) current[key] = PROPS[key].value;
   buildControlPanel(PROPS);   // from controls.js
-  setupHardware();            // from hardware.js
 }
 
 
@@ -67,22 +66,25 @@ function draw() {
   // 3. advance the animation
   pulsePhase += p.pulseSpeed * TWO_PI * dt;
   orbitAngle += p.orbitSpeed * dt;
-  hueOffset  += p.hueDrift * dt;
+  colourPhase += p.colourSpeed * TWO_PI * dt;
 
   // 4. draw
   // A see-through background leaves trails of the previous frames.
-  background(230, 30, 6, 100 * (1 - p.trails));
+  background(10, 12, 16, 255 * (1 - p.trails));
 
   const unit = min(width, height);
-  const r = p.orbitRadius * unit;
-  const x = p.x * width  + cos(orbitAngle) * r + random(-p.jitter, p.jitter);
-  const y = p.y * height + sin(orbitAngle) * r + random(-p.jitter, p.jitter);
+  const orbit = p.orbitRadius * unit;
+  const x = p.x * width  + cos(orbitAngle) * orbit + random(-p.jitter, p.jitter);
+  const y = p.y * height + sin(orbitAngle) * orbit + random(-p.jitter, p.jitter);
   const diameter = p.size * unit * (1 + p.pulseAmount * sin(pulsePhase));
-  const hue = (p.hue + hueOffset) % 360;
+  const swing = (1 - cos(colourPhase)) / 2;   // colour cycling: 0 → 1 → 0
+  const red   = lerp(p.r, 255 - p.r, swing);
+  const green = lerp(p.g, 255 - p.g, swing);
+  const blue  = lerp(p.b, 255 - p.b, swing);
 
-  fill(hue, p.saturation, p.brightness, p.opacity);
+  fill(red, green, blue, p.a);
   if (p.strokeWeight > 0.5) {
-    stroke((hue + 180) % 360, p.saturation * 0.6, 100, p.opacity);  // complementary outline
+    stroke(255 - red, 255 - green, 255 - blue, p.a);  // opposite-colour outline
     strokeWeight(p.strokeWeight);
   } else {
     noStroke();

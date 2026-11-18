@@ -9,12 +9,12 @@ Every input can be connected to any property of the circle or its animation.
 ## Files
 | File | What it is | Who edits it |
 |---|---|---|
-| `steps/step1.js` … `steps/step10.js` | One p5.js sketch per workshop step (step 10: `PROPS`, the drawing, the animation) | Everyone — this is the canvas |
+| `steps/step1.js` … `steps/step11.js` | One p5.js sketch per workshop step (step 11: `PROPS`, the drawing, the animation) | Everyone — this is the canvas |
 | `steps.js` | The list of steps and the step buttons | Add a step here |
 | `controls.js` | The simulated sensors and the panel | Add inputs here |
 | `hardware.js` | WebSocket connection to real hardware | Set hardware ranges in `HW_RANGES` |
 | `wiring.js` | Breadboard diagrams: how to wire each part to the Pi | Change pins here |
-| `codeview.js` | The **Code** button: shows the step's sketch over the canvas | Rarely |
+| `codeview.js` | The **Code** button: shows and edits the step's sketch over the canvas | Rarely |
 | `index.html`, `style.css` | Page and panel styling | Rarely |
 | `pi_bridge.py` | The real Pi bridge: reads the wired parts with gpiozero, sends them to the sketch | List your wired parts in `WIRED` |
 | `test_server.py` | Fake "Raspberry Pi" for testing without hardware | Rarely |
@@ -30,18 +30,27 @@ Each step of the tutorial is its own sketch in `steps/`, picked from the menu at
 stepped through with **‹ ›** or the **← →** keys, or chosen with `?step=3` at the end of the address (combine with `&ws=…` for an installation).
 Each step adds one idea to the one before; **Code** shows the step's sketch.
 
+**Editing the code:** in the Code view, change anything and press **Run** (or Ctrl/⌘+Enter). The step reloads with your edit.
+Edits are saved in your browser, one per step, so they stay after a reload. The **Code ✎** button shows that a step is running an edit.
+**Reset** goes back to the file. The files in `steps/` aren't changed. If the edit has an error, the panel shows it under the step description.
+To keep an edit for good, copy it into `steps/stepN.js`.
+On steps with input cards (9–11), the Code view has a second, read-only tab, **Sensors**. It shows how those cards work in short, simplified code
+(`SENSOR_CODE` in `controls.js`), such as the push button giving 1 while it's held and 0 when it's let go.
+
 1. **A circle** — the bare minimum: `createCanvas`, `background`, `circle`.
 2. **Fill the window** — size the canvas to the space, position with `width`/`height`, `windowResized()`.
-3. **Colour and variables** — HSB colour; the circle's properties as named variables.
+3. **Colour and variables** — RGBA colour (red, green, blue, alpha, 0–255); the circle's properties as named variables.
 4. **Movement** — an animation clock with `deltaTime`; `sin()` makes the size breathe.
 5. **Orbit and trails** — `cos()`/`sin()` orbit, colour cycling, a see-through background.
 6. **The mouse as an input** — any input → 0..1 → `lerp()` to the range a property needs.
-7. **Smoothing** — glide towards the target; an on/off input (mouse button) stops jumping.
-8. **Simulated sensors** — three panel cards; `inputs.slider.value` is 0..1, just like the mouse.
-9. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
-10. **Real hardware** — step 9 plus `setupHardware()`: readings from the Pi, wiring diagrams.
+7. **The keyboard as an input** — a still circle; `keyPressed()` runs once per press: the space bar picks a random colour.
+8. **Smoothing** — glide towards the target; an on/off input (mouse button) stops jumping.
+9. **Simulated sensors** — a still circle and three panel cards (button → size, proximity → left/right, light → brightness); each `inputs.<id>.value` is 0..1, just like the mouse.
+10. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
+    *Hidden for now (`hidden: true` in `steps.js`), so the menu shows Real hardware as step 10.*
+11. **Real hardware** — step 10 plus `setupHardware()`: readings from the Pi, wiring diagrams.
 
-To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`.
+To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`. To hide one without deleting it, add `hidden: true` to its line.
 A step gets input cards with `buildControlPanel(PROPS)` (or `buildControlPanel(null, ['slider', …])` for a few cards
 without dropdowns) and real hardware with `setupHardware()`.
 
@@ -165,9 +174,9 @@ LDR light sensor (with "cover" button) · PIR motion (stays HIGH 3 s) · capacit
 Turn off **Realistic sensor noise** to compare clean vs. real-world readings.
 
 ## Things to try
-- **Add a property:** add a line to `PROPS` in `steps/step10.js` and use `current.yourProp` in `draw()`. It appears in every dropdown.
+- **Add a property:** add a line to `PROPS` in `steps/step11.js` and use `current.yourProp` in `draw()`. It appears in every dropdown.
 - **Add an input:** add an entry to `INPUT_DEFS` and (if it's a new type) a widget in `WIDGETS` in `controls.js`. Hardware can then send readings under its id.
-- **Change the feel:** `SMOOTHING` in `steps/step10.js` (1 = instant, 0.05 = dreamy).
+- **Change the feel:** `SMOOTHING` in `steps/step11.js` (1 = instant, 0.05 = dreamy).
 
 ## Component photos
 Each card shows a small photo of the real part, loaded from Wikimedia Commons (openly licensed).

@@ -1,58 +1,35 @@
-// Step 7 — SMOOTHING
-// Real inputs are jumpy: noisy sensors, buttons that go straight from
-// 0 to 1. Instead of setting a property, move it a fraction of the way
-// towards its target every frame. Jumps become glides.
-// Hold the mouse button down to see an on/off input glide.
+// Step 7 — THE KEYBOARD AS AN INPUT
+// The mouse is read every frame: where is it now? A key press is different:
+// it's an event, something that happens once. p5 calls keyPressed() once
+// for every press, so that's where the action goes.
+// Press the space bar: the circle gets a new random colour.
 
-const SMOOTHING = 0.12;  // 1 = instant (jumpy), 0.05 = slow and dreamy
-
-let hue = 200;
-let saturation = 80;
-let brightness = 95;
-let size = 0.25;
-let pulseSpeed = 0.5;
-let pulseAmount = 0.1;
-let orbitSpeed = 0.6;
-let orbitRadius = 0.2;
-let hueDrift = 0;
-let trails = 0.8;
-
-let pulsePhase = 0;
-let orbitAngle = 0;
-let hueOffset = 0;
+let r = 48;
+let g = 177;
+let b = 242;
+let a = 255;
+let size = 0.35;
 
 function setup() {
   const stage = document.getElementById('stage');
   createCanvas(stage.clientWidth, stage.clientHeight).parent(stage);
-  colorMode(HSB, 360, 100, 100, 100);
 }
 
 function draw() {
-  const dt = min(deltaTime / 1000, 0.1);
-
-  // 1. read the inputs as 0..1
-  const mx = constrain(mouseX / width, 0, 1);
-  const my = constrain(mouseY / height, 0, 1);
-  const pressed = mouseIsPressed ? 1 : 0;        // an on/off input
-
-  // 2. stretch to each range, then glide there: lerp(now, target, SMOOTHING)
-  hue         = lerp(hue,         lerp(0, 360, mx),       SMOOTHING);
-  orbitRadius = lerp(orbitRadius, lerp(0, 0.4, my),       SMOOTHING);
-  pulseAmount = lerp(pulseAmount, lerp(0.1, 0.6, pressed), SMOOTHING);
-
-  // 3. animate and draw
-  pulsePhase += pulseSpeed * TWO_PI * dt;
-  orbitAngle += orbitSpeed * dt;
-  hueOffset  += hueDrift * dt;
-
-  background(230, 30, 6, 100 * (1 - trails));
-  const unit = min(width, height);
-  const x = width / 2  + cos(orbitAngle) * orbitRadius * unit;
-  const y = height / 2 + sin(orbitAngle) * orbitRadius * unit;
-  const diameter = size * unit * (1 + pulseAmount * sin(pulsePhase));
-  fill((hue + hueOffset) % 360, saturation, brightness);
+  background(10, 12, 16);
+  fill(r, g, b, a);
   noStroke();
-  circle(x, y, diameter);
+  circle(width / 2, height / 2, size * min(width, height));
+}
+
+// p5 calls this once each time a key goes down. key is the key that was pressed.
+function keyPressed() {
+  if (key === ' ') {                // ' ' is the space bar
+    r = random(255);                // the action: a new random colour
+    g = random(255);
+    b = random(255);
+    return false;                   // stop the browser doing its own thing with space (like scrolling)
+  }
 }
 
 function windowResized() {

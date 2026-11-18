@@ -46,10 +46,33 @@ body { display: flex; overflow: hidden; }
 .code-name { font: 600 13px ui-monospace, Menlo, monospace; }
 .code-src { flex: 1; }
 .code-bar .btn { width: auto; }
-.code-text {
-  flex: 1; margin: 0; padding: 12px 16px; overflow: auto;
-  font: 12px/1.5 ui-monospace, Menlo, monospace; color: var(--text); tab-size: 2;
+.code-bar .btn.primary { background: var(--accent); color: #111; }
+.code-bar .btn[hidden] { display: none; }
+.code-tabs { display: flex; gap: 2px; }
+.code-tab {
+  background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 8px;
+  color: var(--muted); font: 600 13px ui-monospace, Menlo, monospace; cursor: pointer;
 }
+.code-tab.on { color: var(--text); border-bottom-color: var(--accent); }
+/* the textarea sits exactly over the highlighted copy: same box, same font */
+.code-edit { flex: 1; min-height: 0; position: relative; }
+.code-text, .code-input {
+  position: absolute; inset: 0; margin: 0; padding: 12px 16px; border: 0;
+  font: 12px/1.5 ui-monospace, Menlo, monospace; tab-size: 2;
+  white-space: pre; overflow-wrap: normal; letter-spacing: 0;
+}
+.code-text { overflow: hidden; color: var(--text); pointer-events: none; }
+.code-input {
+  overflow: auto; resize: none; outline: none;
+  background: transparent; color: transparent; caret-color: var(--text);
+}
+.code-input::selection { background: rgba(130, 170, 255, .3); }
+#step-error {
+  margin: 0 0 8px; padding: 8px 10px; border-radius: 6px;
+  background: rgba(255, 90, 90, .12); border: 1px solid rgba(255, 90, 90, .4); color: #ffb3b3;
+  font: 12px/1.4 ui-monospace, Menlo, monospace;
+}
+#step-error[hidden] { display: none; }
 .c-com { color: #7f8799; font-style: italic; }
 .c-str { color: #a5d6a7; }
 .c-num { color: #ffb86b; }

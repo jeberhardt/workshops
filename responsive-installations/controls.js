@@ -19,18 +19,18 @@
 // The inputs on the panel. Add your own here.
 //   type     : which widget to draw (see WIDGETS below)
 //   kind     : 'digital' (on/off) or 'analog' (a range)
-//   target   : the property it starts connected to (a key of PROPS in steps/step10.js)
+//   target   : the property it starts connected to (a key of PROPS in steps/step11.js)
 //   start    : starting value 0..1
 //   channels : for inputs that give more than one value (a joystick gives X and Y)
 // -----------------------------------------------------------------
 const INPUT_DEFS = [
   { id: 'button',    label: 'Push button',            type: 'button',    kind: 'digital', target: 'pulseAmount' },
   { id: 'switch',    label: 'Toggle switch',          type: 'toggle',    kind: 'digital', target: 'trails' },
-  { id: 'slider',    label: 'Slide potentiometer',    type: 'slider',    kind: 'analog',  target: 'hue',        start: 0.55 },
+  { id: 'slider',    label: 'Slide potentiometer',    type: 'slider',    kind: 'analog',  target: 'r',          start: 0.2  },
   { id: 'knob',      label: 'Rotary potentiometer',   type: 'knob',      kind: 'analog',  target: 'pulseSpeed', start: 0.25 },
   { id: 'proximity', label: 'Proximity (ultrasonic)', type: 'proximity', kind: 'analog',  target: 'orbitRadius' },
-  { id: 'light',     label: 'Light sensor (LDR)',     type: 'light',     kind: 'analog',  target: 'brightness' },
-  { id: 'pir',       label: 'Motion sensor (PIR)',    type: 'pir',       kind: 'digital', target: 'hueDrift' },
+  { id: 'light',     label: 'Light sensor (LDR)',     type: 'light',     kind: 'analog',  target: 'a' },
+  { id: 'pir',       label: 'Motion sensor (PIR)',    type: 'pir',       kind: 'digital', target: 'colourSpeed' },
   { id: 'touch',     label: 'Capacitive touch pad',   type: 'touch',     kind: 'digital', target: 'strokeWeight' },
   { id: 'sound',     label: 'Sound sensor (mic)',     type: 'sound',     kind: 'analog',  target: 'jitter' },
   { id: 'joystick',  label: 'Joystick',               type: 'joystick',  kind: 'analog',  channels: [
@@ -119,6 +119,101 @@ function updateInputs(dt) {
     inp.ui.raw.textContent = raw;
   }
 }
+
+
+// -----------------------------------------------------------------
+// What each card does, simplified for beginners. The Code view's
+// "Sensors" tab shows these, not the real WIDGETS code below (which
+// also handles the panel's layout, touch screens and the meters).
+// Change a widget or its simulation? Update its text here too.
+// -----------------------------------------------------------------
+const SENSOR_CODE = {
+
+  button: `// Held down = 1, let go = 0.
+let button = createButton('Press & hold');
+button.mousePressed(pressed);
+button.mouseReleased(released);
+
+function pressed()  { inputs.button.value = 1; }
+function released() { inputs.button.value = 0; }`,
+
+  toggle: `// ON = 1, OFF = 0. Unlike a button, it stays where you leave it.
+let toggle = createCheckbox('ON');
+toggle.changed(flipped);
+
+function flipped() {
+  if (toggle.checked()) inputs.switch.value = 1;
+  else inputs.switch.value = 0;
+}`,
+
+  slider: `// The slider gives 0 to 1023, like the real part does through the Pi's ADC.
+// Dividing by 1023 turns that into 0 to 1.
+let slider = createSlider(0, 1023, 205);
+slider.input(moved);
+
+function moved() { inputs.slider.value = slider.value() / 1023; }`,
+
+  knob: `// Drag the knob up for more, down for less (the mouse wheel works too).
+// 150 pixels of dragging turns it all the way.
+inputs.knob.value = constrain(valueAtStart + (startY - mouseY) / 150, 0, 1);`,
+
+  proximity: `// The slider is the hand's distance: 2 to 200 cm.
+// Closer = higher: 200 cm gives 0, 2 cm gives 1.
+let distance = createSlider(2, 200, 150);
+
+// every frame:
+inputs.proximity.value = 1 - (distance.value() - 2) / 198;
+// With realistic noise on, the distance wobbles by a couple of cm,
+// and now and then an echo is missed and it reads 200 cm.`,
+
+  light: `// The slider is the light in the room: 0 to 100.
+// "Cover with hand" makes it nearly dark while you hold it.
+let level = createSlider(0, 100, 70);
+
+// every frame:
+if (covered) inputs.light.value = 0.04;
+else inputs.light.value = level.value() / 100;
+// With realistic noise on, the reading flickers a little.`,
+
+  pir: `// A motion sensor stays on for a while after it sees someone.
+// "Walk past" turns it on for 3 seconds (3000 milliseconds).
+let walk = createButton('Walk past');
+walk.mousePressed(walkPast);
+
+function walkPast() { onUntil = millis() + 3000; }
+
+// every frame:
+if (millis() < onUntil) inputs.pir.value = 1;
+else inputs.pir.value = 0;`,
+
+  touch: `// Touching = 1, not touching = 0. Just like the push button.
+let pad = createDiv('Touch here');
+pad.mousePressed(touched);
+pad.mouseReleased(letGo);
+
+function touched() { inputs.touch.value = 1; }
+function letGo()   { inputs.touch.value = 0; }`,
+
+  sound: `// A clap is loud for a moment, then fades over about a second.
+let clap = createButton('Clap!');
+clap.mousePressed(clapped);
+
+function clapped() { loudness = 1; }
+
+// every frame:
+loudness = loudness * 0.94;   // a little quieter each time
+inputs.sound.value = max(loudness, backgroundNoise);   // the room is never silent`,
+
+  joystick: `// Drag the dot. Two numbers, one for each direction:
+//   joystickX: 0 = left, 1 = right
+//   joystickY: 0 = top,  1 = bottom
+inputs.joystickX.value = dotX;
+inputs.joystickY.value = dotY;
+
+// Let go: it springs back to the middle.
+inputs.joystickX.value = 0.5;
+inputs.joystickY.value = 0.5;`,
+};
 
 
 // -----------------------------------------------------------------

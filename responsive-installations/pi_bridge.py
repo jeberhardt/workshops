@@ -33,18 +33,20 @@ PORT = 8765
 RATE = 30  # messages per second
 
 # The parts you have wired. Comment out the ones you haven't.
+# The workshop's Real hardware step uses the button, the ultrasonic sensor and the LDR;
+# the others are ready to uncomment if you wire them too.
 WIRED = [
     "button",     # GPIO17 (pin 11) + GND
-    "switch",     # GPIO27 (pin 13) + GND
+    # "switch",     # GPIO27 (pin 13) + GND
     "proximity",  # HC-SR04: TRIG GPIO24 (pin 18), ECHO via divider GPIO25 (pin 22)
-    "pir",        # HC-SR501 OUT GPIO22 (pin 15)
-    "touch",      # TTP223 SIG GPIO23 (pin 16)
-    "slider",     # MCP3008 CH0
-    "knob",       # MCP3008 CH1
+    # "pir",        # HC-SR501 OUT GPIO22 (pin 15)
+    # "touch",      # TTP223 SIG GPIO23 (pin 16)
+    # "slider",     # MCP3008 CH0
+    # "knob",       # MCP3008 CH1
     "light",      # MCP3008 CH2
-    "sound",      # MCP3008 CH3
-    "joystickX",  # MCP3008 CH4
-    "joystickY",  # MCP3008 CH5
+    # "sound",      # MCP3008 CH3
+    # "joystickX",  # MCP3008 CH4
+    # "joystickY",  # MCP3008 CH5
 ]
 
 SOUND_WINDOW = 0.02  # seconds of sound to look at for each loudness reading

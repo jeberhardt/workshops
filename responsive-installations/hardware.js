@@ -217,3 +217,4 @@ function stopRateCounter() { clearInterval(rateTimer); rateTimer = null; }
 // Remember the address between visits (browser storage may be unavailable).
 function loadSetting(key) { try { return localStorage.getItem(key); } catch { return null; } }
 function saveSetting(key, value) { try { localStorage.setItem(key, value); } catch {} }
+function forgetSetting(key) { try { localStorage.removeItem(key); } catch {} }

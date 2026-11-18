@@ -1,55 +1,57 @@
-// Step 8 — SIMULATED SENSORS
-// The panel now has three pretend sensors (controls.js). Each one gives
-// inputs.<id>.value, already 0..1 — exactly like the mouse in step 6.
-// So nothing else changes: stretch to a range, then smooth.
-// Try the slider, hold the button, move the hand distance.
+// Step 8 — SMOOTHING
+// Real inputs are jumpy: noisy sensors, buttons that go straight from
+// 0 to 1. Instead of setting a property, move it a fraction of the way
+// towards its target every frame. Jumps become glides.
+// Hold the mouse button down to see an on/off input glide.
 
-const SMOOTHING = 0.12;
+const SMOOTHING = 0.12;  // 1 = instant (jumpy), 0.05 = slow and dreamy
 
-let hue = 200;
-let saturation = 80;
-let brightness = 95;
+let r = 48;
+let g = 177;
+let b = 242;
+let a = 255;
 let size = 0.25;
 let pulseSpeed = 0.5;
 let pulseAmount = 0.1;
 let orbitSpeed = 0.6;
 let orbitRadius = 0.2;
-let hueDrift = 0;
+let colourSpeed = 0;
 let trails = 0.8;
 
 let pulsePhase = 0;
 let orbitAngle = 0;
-let hueOffset = 0;
+let colourPhase = 0;
 
 function setup() {
   const stage = document.getElementById('stage');
   createCanvas(stage.clientWidth, stage.clientHeight).parent(stage);
-  colorMode(HSB, 360, 100, 100, 100);
-  buildControlPanel(null, ['slider', 'button', 'proximity']);   // from controls.js: just these cards
 }
 
 function draw() {
   const dt = min(deltaTime / 1000, 0.1);
 
   // 1. read the inputs as 0..1
-  updateInputs(dt);   // runs the simulated sensors (controls.js)
+  const mx = constrain(mouseX / width, 0, 1);
+  const my = constrain(mouseY / height, 0, 1);
+  const pressed = mouseIsPressed ? 1 : 0;        // an on/off input
 
-  // 2. stretch and smooth
-  hue         = lerp(hue,         lerp(0, 360, inputs.slider.value),    SMOOTHING);
-  pulseAmount = lerp(pulseAmount, lerp(0.1, 0.6, inputs.button.value),  SMOOTHING);
-  orbitRadius = lerp(orbitRadius, lerp(0, 0.4, inputs.proximity.value), SMOOTHING);
+  // 2. stretch to each range, then glide there: lerp(now, target, SMOOTHING)
+  r           = lerp(r,           lerp(0, 255, mx),       SMOOTHING);
+  orbitRadius = lerp(orbitRadius, lerp(0, 0.4, my),       SMOOTHING);
+  pulseAmount = lerp(pulseAmount, lerp(0.1, 0.6, pressed), SMOOTHING);
 
   // 3. animate and draw
   pulsePhase += pulseSpeed * TWO_PI * dt;
   orbitAngle += orbitSpeed * dt;
-  hueOffset  += hueDrift * dt;
+  colourPhase += colourSpeed * TWO_PI * dt;
 
-  background(230, 30, 6, 100 * (1 - trails));
+  background(10, 12, 16, 255 * (1 - trails));
   const unit = min(width, height);
   const x = width / 2  + cos(orbitAngle) * orbitRadius * unit;
   const y = height / 2 + sin(orbitAngle) * orbitRadius * unit;
   const diameter = size * unit * (1 + pulseAmount * sin(pulsePhase));
-  fill((hue + hueOffset) % 360, saturation, brightness);
+  const swing = (1 - cos(colourPhase)) / 2;   // 0 → 1 → 0: there and back
+  fill(lerp(r, 255 - r, swing), lerp(g, 255 - g, swing), lerp(b, 255 - b, swing), a);
   noStroke();
   circle(x, y, diameter);
 }
