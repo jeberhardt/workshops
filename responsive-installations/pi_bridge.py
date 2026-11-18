@@ -30,6 +30,7 @@ import json
 import os
 import threading
 import time
+import warnings
 
 import websockets
 
@@ -91,6 +92,10 @@ def setup_proximity():
     # Sends centimetres; HW_RANGES in hardware.js turns 200..2 cm into 0..1.
     # gpiozero waits until it has heard enough echoes, so a sensor that's
     # unplugged would freeze every other part. Read it on its own thread instead.
+    # gpiozero warns that its default timing is less accurate than the pigpio
+    # library's. It's accurate enough here, so hide that warning.
+    from gpiozero.exc import PWMSoftwareFallback
+    warnings.filterwarnings("ignore", category=PWMSoftwareFallback)
     d = DistanceSensor(echo=24, trigger=23, max_distance=2)
     latest = {"cm": 200.0}              # "far" until the first echo comes back
     def keep_reading():
