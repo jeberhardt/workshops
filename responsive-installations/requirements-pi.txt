@@ -1,5 +1,6 @@
 # Libraries that only the Raspberry Pi needs, on top of requirements.txt.
-# ./workshop install installs both, plus the NeoPixel library for the Pi's model.
+# ./workshop install installs both.
 # (gpiozero comes with Raspberry Pi OS, through --system-site-packages.)
 adafruit-blinka                    # "board": the Pi's pins for Adafruit's libraries
 adafruit-circuitpython-ads1x15     # the ADS1115 that reads the light sensor
+adafruit-circuitpython-neopixel-spi  # the NeoPixels, on the SPI pin (every Pi model, no sudo)

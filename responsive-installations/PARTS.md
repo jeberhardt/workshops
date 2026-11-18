@@ -6,7 +6,7 @@ using the pin plan in the README's *Wiring the parts to the Pi* table.
 **Steps 1–9 need no hardware**: just a laptop and a browser. The sketch simulates every sensor.
 The parts below are for the *Real hardware* step (step 10 in the menu), which uses the same three parts as *Simulated sensors*:
 a **push button**, an **ultrasonic distance sensor** and a **light sensor (LDR)**,
-and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels**.
+and for the *Outputs* step (step 11 in the menu): a **buzzer** and **3 NeoPixels**.
 
 ## Computer and software
 | Qty | Item | Notes |
@@ -23,7 +23,7 @@ and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels*
 | 1 | Raspberry Pi with a 40-pin header | Any model with Wi-Fi (e.g. Pi 3B+, 4, 5, or Zero 2 W with a soldered header) |
 | 1 | microSD card, 16 GB or more | Raspberry Pi OS (Bookworm or later), which includes `gpiozero` |
 | 1 | Pi power supply | The official supply for your model |
-| — | I2C turned on, and the Python packages | `./workshop install` does both (and the NeoPixel library); see the README |
+| — | I2C turned on, and the Python packages | `./workshop install` does both; see the README |
 
 ## Prototyping
 | Qty | Item | Notes |
@@ -48,9 +48,11 @@ and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels*
 ## Outputs (for the Outputs step)
 | Qty | Part | Connects to | Power |
 |---|---|---|---|
-| 1 | Passive piezo buzzer (a bare disc or a "passive" module; not an active buzzer) | + → GPIO5 (pin 29), − → GND | none |
-| 3 | NeoPixels (WS2812B), chained: a 3-pixel stick or strip, or 3 breakout pixels | DIN → 330 Ω → GPIO18 (pin 12) | 5 V |
-| 1 | 74AHCT125 level shifter (optional) | Between GPIO18 and DIN, if the pixels flicker | 5 V |
+| 1 | Passive buzzer (small and round, plays tones; not an active buzzer, which only beeps) | Through the transistor below | 5 V |
+| 1 | PN2222A NPN transistor | Base → 1 kΩ → GPIO13 (pin 33), emitter → GND, collector → buzzer − | — |
+| 1 | 1N4148 diode | Across the buzzer, stripe to 5 V | — |
+| 3 | NeoPixels (WS2812B), chained: a 3-pixel stick or strip, or 3 breakout pixels | DIN → 330 Ω → GPIO10 (pin 19, SPI) | 5 V |
+| 1 | 74AHCT125 level shifter (optional) | Between GPIO10 and DIN, if the pixels flicker | 5 V |
 
 ## Resistors
 | Qty | Value | Used for |
@@ -59,11 +61,12 @@ and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels*
 | 1 | 2 kΩ | HC-SR04 ECHO voltage divider (bottom). No 2 kΩ? Use 2.2 kΩ or two 1 kΩ in series |
 | 1 | 10 kΩ | LDR voltage divider |
 | 1 | 330 Ω | NeoPixel data line |
+| 1 | 1 kΩ | Buzzer transistor's base |
 
 Never wire the HC-SR04's ECHO pin straight to the Pi: it outputs 5 V, and the Pi's pins take 3.3 V.
 
 ## Useful extras
-- Spare 1 kΩ, 2.2 kΩ and 10 kΩ resistors
+- Spare 1 kΩ, 2.2 kΩ and 10 kΩ resistors, and a spare diode
 - Multimeter, for checking the 3.3 V / 5 V rails and the ECHO divider
 - Projector or large screen, if the sketch is shown as an installation (press **P** to hide the panel and **F** for fullscreen)
 - For an offline venue: the component photos saved into `images/` (see *Component photos* in the README)
@@ -73,7 +76,7 @@ The sketch and `pi_bridge.py` also support a toggle switch, a PIR motion sensor,
 and a joystick. Their pins are in the README's *Wiring the parts to the Pi* table. To use one, uncomment it in `WIRED` in
 `pi_bridge.py` and add its id to the `buildControlPanel()` list in the Real hardware step.
 The potentiometers, microphone and joystick are analog and read through an **MCP3008** chip on SPI, which the three-part
-kit doesn't need.
+kit doesn't need. It shares pin 19 with the NeoPixels, so use one or the other.
 
 ## Per group or per room
 Running several stations? Multiply the tables above by the number of Pis.

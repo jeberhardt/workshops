@@ -50,7 +50,7 @@ On steps with input cards (9–11), the Code view has a second, read-only tab, *
 10. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
     *Hidden for now (`hidden: true` in `steps.js`), so the menu shows Real hardware as step 10.*
 11. **Real hardware** — step 9 plus `setupHardware()`: the same three parts doing the same things, now with readings from the Pi, and wiring diagrams.
-12. **Outputs** — the sketch talks back: buttons send `sendToHardware()` messages, and the Pi beeps a piezo and lights 3 NeoPixels (see *Outputs* below).
+12. **Outputs** — the sketch talks back: buttons send `sendToHardware()` messages, and the Pi beeps a buzzer and lights 3 NeoPixels (see *Outputs* below).
 
 To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`. To hide one without deleting it, add `hidden: true` to its line.
 A step gets input cards with `buildControlPanel(PROPS)` (or `buildControlPanel(null, ['slider', …])` for a few cards
@@ -77,10 +77,10 @@ Recent Raspberry Pi OS (Bookworm and later) refuses `pip install` outside one ("
 ```bash
 ./workshop install
 ```
-It creates the `.venv`, installs `requirements.txt` and `requirements-pi.txt` (Blinka and the ADS1115 library), and the
-NeoPixel library for that Pi's model. It also turns on I2C and SPI, turns the sound off on a Pi 3/4 (the NeoPixels need it), and
-installs the control panel (see *Starting and stopping the servers*). It's safe to run again, e.g. after a `git pull`.
-If it changed I2C, SPI or the sound, it ends by asking you to reboot once.
+It creates the `.venv` and installs `requirements.txt` and `requirements-pi.txt` (Blinka, and the ADS1115 and NeoPixel
+libraries). It also turns on I2C and SPI, steadies the SPI clock on a Pi 3/4 (the NeoPixels need it), and installs the
+control panel (see *Starting and stopping the servers*). It's safe to run again, e.g. after a `git pull`.
+If it changed I2C, SPI or the clock, it ends by asking you to reboot once.
 
 **On a laptop** (for `test_server.py`), once, in the `responsive-installations` folder:
 ```bash
@@ -155,7 +155,7 @@ For example, proximity is set up for centimetres (200 cm = far, 2 cm = close), a
 Digital inputs accept 0/1, HIGH/LOW, on/off or true/false.
 To send something back to the Pi, call `sendToHardware({...})`. `pi_bridge.py` understands:
 ```
-{"beep": {"hz": 880, "ms": 300}}                     the piezo plays a note (110–1760 Hz, up to 5 s)
+{"beep": {"hz": 880, "ms": 300}}                     the buzzer plays a note (55–3520 Hz, up to 5 s)
 {"pixels": [255, 120, 0]}                            every NeoPixel one colour; [0, 0, 0] = off
 {"pixels": [[255, 0, 0], [0, 255, 0], [0, 0, 255]]}  one colour per pixel
 ```
@@ -189,36 +189,29 @@ The Pi has no analog inputs, so analog parts go through an ADC chip:
 - The other analog parts go through an **MCP3008** ADC on SPI
   (CLK → pin 23, DOUT → pin 21, DIN → pin 19, CS → pin 24). Turn SPI on with `sudo raspi-config` → Interface Options → SPI.
   `gpiozero.MCP3008(channel=n).value` already gives 0..1.
+  The NeoPixels' data also goes out on pin 19, so use the MCP3008 or the NeoPixels, not both at once.
 
 ## Outputs
 The Outputs step drives two parts on the Pi. They have no Wiring diagrams yet, so here are the connections:
 
 | Part | Connects to | Power |
 |---|---|---|
-| Passive piezo | + → GPIO5 (pin 29), − → GND | none (the pin drives it) |
-| 3 NeoPixels (WS2812B, chained) | DIN → GPIO18 (pin 12), through a 330 Ω resistor | 5 V (pin 2) + GND |
+| Passive buzzer | GPIO13 (pin 33) → 1 kΩ → PN2222A base; emitter → GND; buzzer between 5 V and the collector, with a 1N4148 diode across it (stripe to 5 V) | 5 V (pin 4) |
+| 3 NeoPixels (WS2812B, chained) | DIN → 330 Ω → GPIO10 (pin 19, SPI MOSI) | 5 V (pin 2) + GND |
+
+The buzzer draws more current than a GPIO pin should give, so the transistor switches it, and the diode soaks up the
+spike when it switches off. gpiozero's `TonalBuzzer` plays the notes; a buzzer is loudest around 2–2.7 kHz.
 
 Three NeoPixels can run from the Pi's 5 V pin; for more, give them their own 5 V supply (with its GND joined to the Pi's).
 The Pi's 3.3 V data signal usually works with a short chain; if the first pixel flickers or shows the wrong colour,
 add a 74AHCT125 level shifter on the data line. List what you've wired in `OUTPUTS` at the top of `pi_bridge.py`.
 
-The NeoPixels need their own library, and which one depends on the Pi. `./workshop install` picks the right one and installs it.
-By hand, in the venv:
+The NeoPixels are driven over SPI with `adafruit-circuitpython-neopixel-spi`, the same way on every Pi from the 3 to the 5,
+without sudo. `./workshop install` installs it, turns SPI on and, on a Pi 3/4, fixes the chip's clock so the SPI timing
+stays steady (`core_freq=250` on a Pi 3, `core_freq=500` and `core_freq_min=500` on a Pi 4, in `/boot/firmware/config.txt`).
+By hand: `pip install adafruit-blinka adafruit-circuitpython-neopixel-spi` in the venv, turn on SPI, add those lines, and reboot.
 
-**Pi 5:**
-```bash
-pip install adafruit-blinka adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf
-```
-
-**Pi 3, 3+ or 4:**
-```bash
-pip install adafruit-blinka adafruit-circuitpython-neopixel
-```
-On these Pis the NeoPixel library needs root, and it shares hardware with the headphone jack's sound:
-- Turn the sound off: `./workshop install` does it, or add `dtparam=audio=off` to `/boot/firmware/config.txt`. Then reboot.
-- Run the bridge with sudo. The control panel does this for you on a Pi 3/4. By hand: `sudo .venv/bin/python pi_bridge.py`.
-
-When the bridge starts, its window lists each output as `ready` or `skipped:` with the reason (a missing library, or no sudo).
+When the bridge starts, its window lists each output as `ready` or `skipped:` with the reason (e.g. a missing library).
 A skipped output doesn't stop the rest: the sensors keep working.
 
 ## Seeing the code

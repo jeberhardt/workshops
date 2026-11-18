@@ -2,7 +2,7 @@
 // So far the Pi has talked to the sketch. Now the sketch talks back.
 // sendToHardware() (hardware.js) sends a message to the Pi over the same
 // WebSocket, and pi_bridge.py on the Pi does what it says:
-//   { beep: { hz: 880, ms: 300 } }   the piezo plays a note: hz = how high, ms = how long
+//   { beep: { hz: 880, ms: 300 } }   the buzzer plays a note: hz = how high, ms = how long
 //   { pixels: [255, 120, 0] }        the 3 NeoPixels light up in that colour (red, green, blue)
 // Press the buttons on the Outputs card. Connect to the Pi first.
 
@@ -35,7 +35,7 @@ function buildOutputButtons() {
   createButton('Beep').class('btn').parent(buttons).mousePressed(beep);
   createButton('Lights on').class('btn').parent(buttons).mousePressed(lightsOn);
   createButton('Lights off').class('btn').parent(buttons).mousePressed(lightsOff);
-  createDiv('Piezo: GPIO5 (pin 29) · NeoPixels: GPIO18 (pin 12)').class('sub').parent(buttons);
+  createDiv('Buzzer: GPIO13 (pin 33) · NeoPixels: GPIO10 (pin 19)').class('sub').parent(buttons);
 }
 
 function beep() {

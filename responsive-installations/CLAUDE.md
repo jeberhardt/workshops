@@ -19,8 +19,8 @@ python pi_bridge.py                    # on the Pi: reads the wired parts with g
 ```
 `gpiozero` is deliberately not in `requirements.txt`: it comes from Raspberry Pi OS via `--system-site-packages`.
 On a Pi, `./workshop install` does all the setup: the venv, `requirements.txt` + `requirements-pi.txt` (Pi-only libraries),
-the NeoPixel library for the model, I2C/SPI, sound off on a Pi 3/4, and the control panel. A new Pi-only library goes in
-`requirements-pi.txt`; a model-specific one goes in `install_packages()` in `workshop`.
+I2C/SPI, a fixed core clock on a Pi 3/4 (steady SPI timing for the NeoPixels), and the control panel. A new Pi-only
+library goes in `requirements-pi.txt`.
 
 **Checking JS changes:** `node --check` on a single file is not enough. The page's classic scripts share one global
 scope, so a top-level name declared in two of them makes the browser reject a whole script (this has broken the page before).
@@ -54,8 +54,9 @@ loaded; changing step reloads the page.
   Step 12 (Outputs) is step 11 plus an Outputs card.
 - Output messages (`{"beep": {hz, ms}}`, `{"pixels": [r, g, b] | [[r, g, b], …]}`) are sent by `steps/step12.js` and handled
   by `act_on()` in `pi_bridge.py` (`OUTPUT_KEYS` maps output names to message keys). The README's message-format
-  section documents them. NeoPixels use a different library on a Pi 5 and a Pi 3/4, and need root on a Pi 3/4, so
-  `control.py` starts the bridge with `sudo -E` there.
+  section documents them. The pins (buzzer GPIO13, NeoPixels GPIO10 over SPI with
+  `neopixel_spi`, no sudo, every model) follow the slide deck (`slides/outputs-overview.html`, `slides/button-pin.html`),
+  as do the input pins: change the deck and the code together.
 - Each `STEPS` entry lists `globals`/`functions`. Over `file://` the Code view can't fetch the file, so it rebuilds
   the code from these names. It also assumes step constants are in CAPITALS (that's how it tells `const` from `let`).
 

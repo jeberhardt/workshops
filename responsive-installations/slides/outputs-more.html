@@ -60,7 +60,7 @@
 <p style="font-size:24px;line-height:1.4;color:#4A4658">Hand off to TouchDesigner, Ableton, a lighting desk</p>
 </div>
 </div>
-<aside>Same pattern as the LED and haptic motor: the sketch sends a message, Python drives the hardware. Anything with a motor or a coil (DC motor, solenoid, fan) needs a transistor or driver and its own power, like the haptic motor. For relays, use pre-built low-voltage modules or smart plugs — never wire mains power in a workshop. LED strip libraries differ between the Pi 4 and Pi 5, so check before buying.</aside>
+<aside>Same pattern as the NeoPixels and buzzer: the sketch sends a message, Python drives the hardware. Anything with a motor or a coil (DC motor, solenoid, fan) needs a transistor or driver, like the buzzer, and usually its own power supply. For relays, use pre-built low-voltage modules or smart plugs — never wire mains power in a workshop. LED strips are NeoPixels in a row: the same SPI code drives them, but a long strip needs its own 5V supply.</aside>
 </section>
 <script src="slide.js"></script>
 </body>

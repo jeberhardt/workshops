@@ -3,31 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Slide 27: Output 2 · Haptic motor</title>
+  <title>Slide 27: Output 2 · Buzzer</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..700&amp;family=Space+Grotesk:wght@300..700&amp;display=swap">
   <link rel="stylesheet" href="slides.css">
 </head>
 <body>
 <section id="haptic" style="background:#15131F;color:#F3EFE6;font-family:'Space Grotesk', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
-<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Output 2 · Haptic motor</h2>
+<h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#F3EFE6">Output 2 · Buzzer</h2>
 <div style="display:flex;gap:64px;flex:1">
 <div style="width:520px;display:flex;flex-direction:column;gap:24px">
-<p style="font-size:32px;line-height:1.4;color:#F3EFE6">A pager motor needs more current than a pin can give, so a transistor switches it.</p>
-<p style="font-size:24px;line-height:1.4;color:#BDB8CC">GPIO 13 (pin 33) through 1kΩ to an NPN transistor. Motor on the 3.3V rail, with a diode across it.</p>
+<p style="font-size:32px;line-height:1.4;color:#F3EFE6">A buzzer needs more current than a pin can give, so a transistor switches it.</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC">GPIO 13 (pin 33) through 1kΩ to a PN2222A transistor. Buzzer from 5V to the transistor, with a diode across it.</p>
 <div style="flex:1;display:flex;flex-direction:column;justify-content:center;border:3px dashed #5A5570;border-radius:16px;padding:32px">
-<p style="font-size:24px;line-height:1.4;color:#BDB8CC;text-align:center">[Fritzing diagram: haptic motor + transistor on GPIO 13]</p>
+<p style="font-size:24px;line-height:1.4;color:#BDB8CC;text-align:center">[Fritzing diagram: buzzer + transistor on GPIO 13]</p>
 </div>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:24px">
 <div style="display:flex;flex-direction:column;background:#221F33;padding:28px;border-radius:16px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">from gpiozero import PWMOutputDevice<br>haptic = PWMOutputDevice(13)<br><br># add to the handler’s message checks:<br>elif msg == "buzz": haptic.blink(on_time=0.1, off_time=0.1, n=3)<br>elif msg.startswith("rumble:"): haptic.value = float(msg[7:])</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">from gpiozero import TonalBuzzer<br>from gpiozero.tones import Tone<br>buzzer = TonalBuzzer(13, octaves=3)<br><br># add to the handler, after data = json.loads(msg):<br>if "beep" in data:<br>&#160;&#160;&#160;&#160;buzzer.play(Tone.from_frequency(data["beep"]["hz"]))<br>&#160;&#160;&#160;&#160;await asyncio.sleep(data["beep"]["ms"] / 1000)<br>&#160;&#160;&#160;&#160;buzzer.stop()</p>
 </div>
 <div style="display:flex;flex-direction:column;background:#221F33;padding:28px;border-radius:16px">
-<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">// in setup():<br>createButton("Buzz").mousePressed(() =&gt; ws.send("buzz"));<br>const rumble = createSlider(0, 1, 0, 0.01);<br>rumble.input(() =&gt; ws.send("rumble:" + rumble.value()));<br><br>// or close the loop: buzz once when a visitor gets close<br>// if (near &gt; 0.8 &amp;&amp; !buzzed) { ws.send("buzz"); buzzed = true; }</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.35;color:#F3EFE6;white-space:nowrap">// in setup():<br>createButton("Beep").mousePressed(() =&gt;<br>&#160;&#160;ws.send(JSON.stringify({ beep: { hz: 880, ms: 300 } })));<br><br>// or close the loop: beep once when a visitor gets close<br>// if (near &gt; 0.8 &amp;&amp; !beeped) { ws.send(...); beeped = true; }</p>
 </div>
 </div>
 </div>
-<aside>“buzz” plays a three-pulse pattern; “rumble” sets a continuous strength. Patterns are where haptics get expressive: try a heartbeat (two short pulses, a pause) or a slow swell. Never wire the motor straight to a GPIO pin — it can draw far more than the pin is rated for. The diode soaks up the voltage spike when the motor switches off. If your motors came on breakout boards with a driver, you can skip the transistor and connect the board’s signal pin directly. [Confirm part numbers for the transistor and diode in the kit.]</aside>
+<aside>hz is how high the note is, ms how long it lasts. With octaves=3, TonalBuzzer plays 55 Hz to about 3.5 kHz; a small buzzer is loudest around 2 to 2.7 kHz. Sound is where outputs get expressive: try a two-note chime, or a rising sweep as someone walks up. Use a passive buzzer: an active one has its own oscillator and only beeps at one pitch. Never wire the buzzer straight to a GPIO pin — it draws more than the pin is rated for. The diode soaks up the voltage spike when the buzzer switches off (stripe towards 5V).</aside>
 </section>
 <script src="slide.js"></script>
 </body>

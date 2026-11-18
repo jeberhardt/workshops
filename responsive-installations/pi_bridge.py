@@ -13,7 +13,7 @@ listed is left out, so its card in the sketch keeps simulating.
 
 It also drives outputs (OUTPUTS below) when the sketch asks, with
 sendToHardware() in the Outputs step:
-    {"beep": {"hz": 880, "ms": 300}}     the piezo plays a note
+    {"beep": {"hz": 880, "ms": 300}}     the buzzer plays a note
     {"pixels": [255, 120, 0]}            all NeoPixels one colour ([0, 0, 0] = off)
     {"pixels": [[255,0,0], [0,255,0], [0,0,255]]}   one colour each
 
@@ -21,13 +21,12 @@ Needs: gpiozero (comes with Raspberry Pi OS) and websockets (see
 "Installing the Python packages" in the README). The light sensor reads
 through an ADS1115 on I2C: turn I2C on (sudo raspi-config -> Interface
 Options -> I2C) and pip install adafruit-circuitpython-ads1x15. The other
-analog parts use an MCP3008 on SPI (turn SPI on the same way). The NeoPixels need
-their own library, different on a Pi 5 and a Pi 3/4, and on a Pi 3/4 the
-bridge must run with sudo (see "Outputs" in the README).
+analog parts use an MCP3008 on SPI (turn SPI on the same way). The NeoPixels
+also use SPI, and pip install adafruit-circuitpython-neopixel-spi.
+./workshop install does all of this.
 """
 import asyncio
 import json
-import os
 import threading
 import time
 import warnings
@@ -71,8 +70,8 @@ SOUND_WINDOW = 0.02  # seconds of sound to look at for each loudness reading
 
 # The outputs you have wired. Comment out the ones you haven't.
 OUTPUTS = [
-    "piezo",      # passive piezo: GPIO5 (pin 29) + GND
-    "pixels",     # NeoPixels: DIN GPIO18 (pin 12), 5V, GND
+    "buzzer",     # passive buzzer, through a transistor: GPIO13 (pin 33)
+    "pixels",     # NeoPixels: DIN via 330 ohm to GPIO10 (pin 19, SPI), 5V, GND
 ]
 PIXEL_COUNT = 3
 PIXEL_BRIGHTNESS = 0.3  # 0..1. Full brightness is dazzling up close
@@ -171,10 +170,10 @@ SETUP = {
 # --- Outputs: one setup function each, returns (do, off) ---
 # do(value) acts on the value from the sketch's message; off() switches it off.
 
-def setup_piezo():
+def setup_buzzer():
     from gpiozero import TonalBuzzer
     from gpiozero.tones import Tone
-    buzzer = TonalBuzzer(5, octaves=2)  # can play 110 Hz to 1760 Hz
+    buzzer = TonalBuzzer(13, octaves=3)  # can play 55 Hz to 3520 Hz
     low, high = buzzer.min_tone.frequency, buzzer.max_tone.frequency
     timer = None
 
@@ -190,45 +189,16 @@ def setup_piezo():
     return beep, buzzer.stop
 
 
-def is_pi5():
-    try:
-        with open("/proc/device-tree/model") as f:
-            return "Raspberry Pi 5" in f.read()
-    except OSError:
-        return False
-
-
 def setup_pixels():
-    if is_pi5():
-        # Pi 5: Adafruit's Pi 5 library (pip install adafruit-blinka-raspberry-pi5-neopixel)
-        try:
-            import board
-            import adafruit_pixelbuf
-            from adafruit_raspberry_pi5_neopixel_write import neopixel_write
-        except ImportError:
-            raise needs("adafruit-blinka adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf")
-
-        class Pi5Pixels(adafruit_pixelbuf.PixelBuf):
-            def __init__(self, pin, size, **kwargs):
-                self._pin = pin
-                super().__init__(size=size, **kwargs)
-
-            def _transmit(self, buf):
-                neopixel_write(self._pin, buf)
-
-        strip = Pi5Pixels(board.D18, PIXEL_COUNT, byteorder="GRB",
-                          brightness=PIXEL_BRIGHTNESS, auto_write=True)
-    else:
-        # Pi 3/4: the usual library (pip install adafruit-circuitpython-neopixel). Needs sudo.
-        if os.geteuid() != 0:
-            raise RuntimeError("on a Pi 3/4 the NeoPixels need sudo (see Outputs in the README)")
-        try:
-            import board
-            import neopixel
-        except ImportError:
-            raise needs("adafruit-blinka adafruit-circuitpython-neopixel")
-        strip = neopixel.NeoPixel(board.D18, PIXEL_COUNT,
-                                  brightness=PIXEL_BRIGHTNESS, auto_write=True)
+    # The NeoPixels' data goes out on the SPI pin (GPIO10, pin 19). This works the
+    # same on every Pi from the 3 to the 5, and needs no sudo.
+    try:
+        import board
+        import neopixel_spi
+    except ImportError:
+        raise needs("adafruit-blinka adafruit-circuitpython-neopixel-spi")
+    strip = neopixel_spi.NeoPixel_SPI(board.SPI(), PIXEL_COUNT, pixel_order=neopixel_spi.GRB,
+                                      brightness=PIXEL_BRIGHTNESS, auto_write=True)
 
     def colour(c):
         return tuple(min(max(int(v), 0), 255) for v in c[:3])
@@ -248,11 +218,11 @@ def setup_pixels():
 
 
 OUTPUT_SETUP = {
-    "piezo": setup_piezo,
+    "buzzer": setup_buzzer,
     "pixels": setup_pixels,
 }
 # The message key the sketch uses for each output.
-OUTPUT_KEYS = {"piezo": "beep", "pixels": "pixels"}
+OUTPUT_KEYS = {"buzzer": "beep", "pixels": "pixels"}
 
 
 def setup_outputs():
@@ -388,4 +358,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
-        outputs_off()                   # don't leave the piezo squealing or the pixels on
+        outputs_off()                   # don't leave the buzzer squealing or the pixels on

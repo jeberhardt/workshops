@@ -8,10 +8,9 @@
 # Setup (on the Pi, in the folder with pi_bridge.py and control.py, as your
 # normal user, not with sudo). Safe to run again, e.g. after a git pull:
 #   chmod +x workshop && ./workshop install
-# It creates the .venv, installs the Python packages (requirements.txt,
-# requirements-pi.txt and the NeoPixel library for this Pi's model), turns on
-# I2C and SPI, turns the sound off on a Pi 3/4 (the NeoPixels need it), and
-# installs the control panel so it starts at boot.
+# It creates the .venv, installs the Python packages (requirements.txt and
+# requirements-pi.txt), turns on I2C and SPI, steadies the SPI clock on a Pi 3/4
+# (the NeoPixels need it), and installs the control panel so it starts at boot.
 #
 # Then:
 #   workshop start   [bridge|http|all]     (default: all)
@@ -32,25 +31,34 @@ is_pi5() { tr -d '\0' < /proc/device-tree/model 2>/dev/null | grep -q "Raspberry
 
 step() { echo; echo "== $*"; }
 
-# The Python packages: the shared ones, the Pi-only ones, and this model's NeoPixel library.
+# The Python packages: the shared ones and the Pi-only ones.
 install_packages() {
   local dir="$1" py="$2"
   step "Installing Python packages"
   "$py" -m pip install -r "$dir/requirements.txt" -r "$dir/requirements-pi.txt"
-
-  if is_pi5; then
-    step "Installing the NeoPixel library for a Pi 5"
-    "$py" -m pip install adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf \
-      || echo "!! The NeoPixel library didn't install. The rest works; the pixels will be skipped."
-  else
-    step "Installing the NeoPixel library for a Pi 3/4"
-    "$py" -m pip install adafruit-circuitpython-neopixel \
-      || echo "!! The NeoPixel library didn't install (it builds from source: try  sudo apt install python3-dev  and run this again). The rest works; the pixels will be skipped."
-  fi
 }
 
-# I2C (the ADS1115) and SPI (the MCP3008), and on a Pi 3/4 the sound off (it shares hardware
-# with the NeoPixels). Sets NEEDS_REBOOT=1 when a change only works after a reboot.
+# Sets key=value in the Pi's config.txt, unless it's already set. NEEDS_REBOOT=1 if it changed.
+set_boot_config() {
+  local key="$1" value="$2" cfg=/boot/firmware/config.txt
+  [[ -f "$cfg" ]] || cfg=/boot/config.txt
+  if grep -q "^$key=$value\$" "$cfg"; then
+    echo "$key=$value already set."
+    return
+  fi
+  if grep -q "^$key=" "$cfg"; then
+    sudo sed -i "s/^$key=.*/$key=$value/" "$cfg"
+  else
+    echo "$key=$value" | sudo tee -a "$cfg" >/dev/null
+  fi
+  echo "Set $key=$value in $cfg."
+  NEEDS_REBOOT=1
+}
+
+# I2C (the ADS1115) and SPI (the NeoPixels, and the MCP3008 if used). On a Pi 3/4
+# the SPI clock follows the chip's speed, which changes as it works harder; the
+# NeoPixels need a steady clock, so fix it. (A Pi 5's SPI has its own clock.)
+# Sets NEEDS_REBOOT=1 when a change only works after a reboot.
 NEEDS_REBOOT=0
 setup_interfaces() {
   step "Turning on I2C and SPI"
@@ -65,21 +73,15 @@ setup_interfaces() {
     sudo raspi-config nonint do_spi 0 && echo "SPI turned on." && NEEDS_REBOOT=1
   else echo "SPI already on."; fi
 
-  if ! is_pi5; then
-    step "Turning the sound off (a Pi 3/4 needs it off for the NeoPixels)"
-    local cfg=/boot/firmware/config.txt
-    [[ -f "$cfg" ]] || cfg=/boot/config.txt
-    if grep -q "^dtparam=audio=off" "$cfg"; then
-      echo "Sound already off."
-    else
-      if grep -q "^dtparam=audio=on" "$cfg"; then
-        sudo sed -i 's/^dtparam=audio=on/dtparam=audio=off/' "$cfg"
-      else
-        echo "dtparam=audio=off" | sudo tee -a "$cfg" >/dev/null
-      fi
-      echo "Sound turned off in $cfg."
-      NEEDS_REBOOT=1
-    fi
+  if is_pi5; then
+    return
+  fi
+  step "Steadying the SPI clock for the NeoPixels"
+  if tr -d '\0' < /proc/device-tree/model 2>/dev/null | grep -q "Raspberry Pi 4\|Raspberry Pi 400\|Compute Module 4"; then
+    set_boot_config core_freq 500
+    set_boot_config core_freq_min 500
+  else
+    set_boot_config core_freq 250
   fi
 }
 
@@ -144,7 +146,7 @@ EOF
   echo "Done. Control panel: http://$(ip_addr):$PANEL_PORT  (starts automatically at boot)"
   if [[ "$NEEDS_REBOOT" == 1 ]]; then
     echo
-    echo "Reboot once so the I2C, SPI and sound changes take effect:  sudo reboot"
+    echo "Reboot once so the I2C, SPI and clock changes take effect:  sudo reboot"
   fi
 }
 
