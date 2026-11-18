@@ -29,12 +29,22 @@ PANEL_PORT = 8080
 AUTOSTART = True          # start both servers when the panel starts (e.g. at boot)
 LOG_LINES = 1000          # lines of output kept per server
 
+def _is_pi5():
+    try:
+        return "Raspberry Pi 5" in Path("/proc/device-tree/model").read_text()
+    except OSError:
+        return False
+
+# On a Pi 3/4 the NeoPixel library needs root, so the bridge runs with sudo
+# (Raspberry Pi OS lets its first user sudo without a password). A Pi 5 doesn't need it.
+BRIDGE_SUDO = [] if os.geteuid() == 0 or _is_pi5() else ["sudo", "-E"]
+
 SERVERS = {
     "bridge": {
         "label": "WebSocket bridge",
         "port": 8765,
         "cwd": HERE,
-        "cmd": [sys.executable, "-u", "pi_bridge.py"],
+        "cmd": BRIDGE_SUDO + [sys.executable, "-u", "pi_bridge.py"],
     },
     "http": {
         "label": "HTTP sketch server",

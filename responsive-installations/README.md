@@ -9,7 +9,7 @@ Every input can be connected to any property of the circle or its animation.
 ## Files
 | File | What it is | Who edits it |
 |---|---|---|
-| `steps/step1.js` … `steps/step11.js` | One p5.js sketch per workshop step (step 10: `PROPS`, the drawing, the animation) | Everyone — this is the canvas |
+| `steps/step1.js` … `steps/step12.js` | One p5.js sketch per workshop step (step 10: `PROPS`, the drawing, the animation) | Everyone — this is the canvas |
 | `steps.js` | The list of steps and the step buttons | Add a step here |
 | `controls.js` | The simulated sensors and the panel | Add inputs here |
 | `hardware.js` | WebSocket connection to real hardware | Set hardware ranges in `HW_RANGES` |
@@ -49,6 +49,7 @@ On steps with input cards (9–11), the Code view has a second, read-only tab, *
 10. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
     *Hidden for now (`hidden: true` in `steps.js`), so the menu shows Real hardware as step 10.*
 11. **Real hardware** — step 9 plus `setupHardware()`: the same three parts doing the same things, now with readings from the Pi, and wiring diagrams.
+12. **Outputs** — the sketch talks back: buttons send `sendToHardware()` messages, and the Pi beeps a piezo and lights 3 NeoPixels (see *Outputs* below).
 
 To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`. To hide one without deleting it, add `hidden: true` to its line.
 A step gets input cards with `buildControlPanel(PROPS)` (or `buildControlPanel(null, ['slider', …])` for a few cards
@@ -142,7 +143,12 @@ Input ids: `button`, `switch`, `slider`, `knob`, `proximity`, `light`, `pir`, `t
 Values are 0..1 by default. If your hardware sends another range, add it to `HW_RANGES` in `hardware.js`.
 For example, proximity is set up for centimetres (200 cm = far, 2 cm = close), and a 10-bit ADC would be `{ min: 0, max: 1023 }`.
 Digital inputs accept 0/1, HIGH/LOW, on/off or true/false.
-To send something back to the server (LEDs, motors later), call `sendToHardware({...})`.
+To send something back to the Pi, call `sendToHardware({...})`. `pi_bridge.py` understands:
+```
+{"beep": {"hz": 880, "ms": 300}}                     the piezo plays a note (110–1760 Hz, up to 5 s)
+{"pixels": [255, 120, 0]}                            every NeoPixel one colour; [0, 0, 0] = off
+{"pixels": [[255, 0, 0], [0, 255, 0], [0, 0, 255]]}  one colour per pixel
+```
 
 ### The https gotcha
 Browsers won't let an **https** page (like the p5.js Web Editor) open a plain `ws://` connection to another computer.
@@ -162,11 +168,46 @@ The pins are planned so every part can be connected at the same time:
 | Ultrasonic HC-SR04 | TRIG → GPIO24 (pin 18), ECHO → **1 kΩ/2 kΩ divider** → GPIO25 (pin 22) | 5 V |
 | PIR HC-SR501 | OUT → GPIO22 (pin 15) | 5 V |
 | Touch TTP223 | SIG → GPIO23 (pin 16) | 3.3 V |
-| Slide pot · rotary pot · LDR · mic · joystick X/Y | MCP3008 CH0 · CH1 · CH2 · CH3 · CH4/CH5 | 3.3 V |
+| LDR (light sensor) | **ADS1115** breakout A0 (I2C: SDA → pin 3, SCL → pin 5); LDR from 3.3 V to A0, 10 kΩ from A0 to GND | 3.3 V |
+| Slide pot · rotary pot · mic · joystick X/Y | MCP3008 CH0 · CH1 · CH3 · CH4/CH5 | 3.3 V |
 
-The Pi has no analog inputs, so the analog parts go through an **MCP3008** ADC on SPI
-(CLK → pin 23, DOUT → pin 21, DIN → pin 19, CS → pin 24). Turn SPI on with `sudo raspi-config` → Interface Options → SPI.
-`gpiozero.MCP3008(channel=n).value` already gives 0..1.
+The Pi has no analog inputs, so analog parts go through an ADC chip:
+- The **LDR** uses an **ADS1115** breakout on I2C. Turn I2C on with `sudo raspi-config` → Interface Options → I2C,
+  then `i2cdetect -y 1` should show `48`. In the venv: `pip install adafruit-circuitpython-ads1x15`.
+  `pi_bridge.py` sends A0's voltage ÷ 3.3, so 0..1 (more light, higher).
+- The other analog parts go through an **MCP3008** ADC on SPI
+  (CLK → pin 23, DOUT → pin 21, DIN → pin 19, CS → pin 24). Turn SPI on with `sudo raspi-config` → Interface Options → SPI.
+  `gpiozero.MCP3008(channel=n).value` already gives 0..1.
+
+## Outputs
+The Outputs step drives two parts on the Pi. They have no Wiring diagrams yet, so here are the connections:
+
+| Part | Connects to | Power |
+|---|---|---|
+| Passive piezo | + → GPIO5 (pin 29), − → GND | none (the pin drives it) |
+| 3 NeoPixels (WS2812B, chained) | DIN → GPIO18 (pin 12), through a 330 Ω resistor | 5 V (pin 2) + GND |
+
+Three NeoPixels can run from the Pi's 5 V pin; for more, give them their own 5 V supply (with its GND joined to the Pi's).
+The Pi's 3.3 V data signal usually works with a short chain; if the first pixel flickers or shows the wrong colour,
+add a 74AHCT125 level shifter on the data line. List what you've wired in `OUTPUTS` at the top of `pi_bridge.py`.
+
+The NeoPixels need their own library, and which one depends on the Pi. In the venv (see *Installing the Python packages*):
+
+**Pi 5:**
+```bash
+pip install adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf
+```
+
+**Pi 3, 3+ or 4:**
+```bash
+pip install adafruit-circuitpython-neopixel
+```
+On these Pis the NeoPixel library needs root, and it shares hardware with the headphone jack's sound:
+- Turn the sound off: add `dtparam=audio=off` to `/boot/firmware/config.txt`, then reboot.
+- Run the bridge with sudo. The control panel does this for you on a Pi 3/4. By hand: `sudo .venv/bin/python pi_bridge.py`.
+
+When the bridge starts, its window lists each output as `ready` or `skipped:` with the reason (a missing library, or no sudo).
+A skipped output doesn't stop the rest: the sensors keep working.
 
 ## Seeing the code
 Press **Code** (or **C**) to show the current step's sketch over the canvas; press it again to hide it.

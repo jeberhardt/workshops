@@ -11,12 +11,23 @@ Only wired some of the parts? List them in WIRED below. A part that isn't
 listed is left out, so its card in the sketch keeps simulating.
 (Unconnected MCP3008 channels float and would send random noise.)
 
-Needs: gpiozero (comes with Raspberry Pi OS), SPI turned on for the
-MCP3008 (sudo raspi-config -> Interface Options -> SPI), and websockets
-(see "Installing the Python packages" in the README).
+It also drives outputs (OUTPUTS below) when the sketch asks, with
+sendToHardware() in the Outputs step:
+    {"beep": {"hz": 880, "ms": 300}}     the piezo plays a note
+    {"pixels": [255, 120, 0]}            all NeoPixels one colour ([0, 0, 0] = off)
+    {"pixels": [[255,0,0], [0,255,0], [0,0,255]]}   one colour each
+
+Needs: gpiozero (comes with Raspberry Pi OS) and websockets (see
+"Installing the Python packages" in the README). The light sensor reads
+through an ADS1115 on I2C: turn I2C on (sudo raspi-config -> Interface
+Options -> I2C) and pip install adafruit-circuitpython-ads1x15. The other
+analog parts use an MCP3008 on SPI (turn SPI on the same way). The NeoPixels need
+their own library, different on a Pi 5 and a Pi 3/4, and on a Pi 3/4 the
+bridge must run with sudo (see "Outputs" in the README).
 """
 import asyncio
 import json
+import os
 import threading
 import time
 
@@ -49,13 +60,21 @@ WIRED = [
     # "touch",      # TTP223 SIG GPIO23 (pin 16)
     # "slider",     # MCP3008 CH0
     # "knob",       # MCP3008 CH1
-    "light",      # MCP3008 CH2
+    "light",      # ADS1115 A0, on I2C: SDA pin 3, SCL pin 5
     # "sound",      # MCP3008 CH3
     # "joystickX",  # MCP3008 CH4
     # "joystickY",  # MCP3008 CH5
 ]
 
 SOUND_WINDOW = 0.02  # seconds of sound to look at for each loudness reading
+
+# The outputs you have wired. Comment out the ones you haven't.
+OUTPUTS = [
+    "piezo",      # passive piezo: GPIO5 (pin 29) + GND
+    "pixels",     # NeoPixels: DIN GPIO18 (pin 12), 5V, GND
+]
+PIXEL_COUNT = 3
+PIXEL_BRIGHTNESS = 0.3  # 0..1. Full brightness is dazzling up close
 
 
 # --- One setup function per part: returns a function that gives its reading ---
@@ -95,6 +114,20 @@ def setup_adc(channel):
         return lambda: round(adc.value, 3)
     return setup
 
+def setup_light():
+    # The LDR reads through an ADS1115 breakout on I2C (A0), not the MCP3008.
+    import board
+    import adafruit_ads1x15.ads1115 as ADS
+    from adafruit_ads1x15.analog_in import AnalogIn
+    ads = ADS.ADS1115(board.I2C())      # address 0x48: ADDR left unconnected
+    a0 = getattr(ADS, "P0", None)
+    if a0 is None:                      # newer versions of the library name the pins differently
+        from adafruit_ads1x15.ads1x15 import Pin
+        a0 = Pin.A0
+    light = AnalogIn(ads, a0)
+    # The divider gives 0 V (dark) to 3.3 V (bright): send it as 0..1.
+    return lambda: round(min(max(light.voltage / 3.3, 0.0), 1.0), 3)
+
 def setup_sound():
     # The mic gives the raw wave around half-way. Loudness = how far it swings.
     mic = MCP3008(channel=3)
@@ -115,11 +148,123 @@ SETUP = {
     "touch": setup_touch,
     "slider": setup_adc(0),
     "knob": setup_adc(1),
-    "light": setup_adc(2),
+    "light": setup_light,
     "sound": setup_sound,
     "joystickX": setup_adc(4),
     "joystickY": setup_adc(5),
 }
+
+
+# --- Outputs: one setup function each, returns (do, off) ---
+# do(value) acts on the value from the sketch's message; off() switches it off.
+
+def setup_piezo():
+    from gpiozero import TonalBuzzer
+    from gpiozero.tones import Tone
+    buzzer = TonalBuzzer(5, octaves=2)  # can play 110 Hz to 1760 Hz
+    low, high = buzzer.min_tone.frequency, buzzer.max_tone.frequency
+    timer = None
+
+    def beep(value):                    # {"hz": 880, "ms": 300}
+        nonlocal timer
+        hz = min(max(float(value.get("hz", 880)), low), high)
+        ms = min(max(float(value.get("ms", 300)), 10), 5000)
+        if timer:
+            timer.cancel()              # a new beep replaces one still playing
+        buzzer.play(Tone.from_frequency(hz))
+        timer = threading.Timer(ms / 1000, buzzer.stop)
+        timer.start()
+    return beep, buzzer.stop
+
+
+def is_pi5():
+    try:
+        with open("/proc/device-tree/model") as f:
+            return "Raspberry Pi 5" in f.read()
+    except OSError:
+        return False
+
+
+def setup_pixels():
+    import board
+    if is_pi5():
+        # Pi 5: Adafruit's Pi 5 library (pip install adafruit-blinka-raspberry-pi5-neopixel)
+        import adafruit_pixelbuf
+        from adafruit_raspberry_pi5_neopixel_write import neopixel_write
+
+        class Pi5Pixels(adafruit_pixelbuf.PixelBuf):
+            def __init__(self, pin, size, **kwargs):
+                self._pin = pin
+                super().__init__(size=size, **kwargs)
+
+            def _transmit(self, buf):
+                neopixel_write(self._pin, buf)
+
+        strip = Pi5Pixels(board.D18, PIXEL_COUNT, byteorder="GRB",
+                          brightness=PIXEL_BRIGHTNESS, auto_write=True)
+    else:
+        # Pi 3/4: the usual library (pip install adafruit-circuitpython-neopixel). Needs sudo.
+        if os.geteuid() != 0:
+            raise RuntimeError("on a Pi 3/4 the NeoPixels need sudo (see Outputs in the README)")
+        import neopixel
+        strip = neopixel.NeoPixel(board.D18, PIXEL_COUNT,
+                                  brightness=PIXEL_BRIGHTNESS, auto_write=True)
+
+    def colour(c):
+        return tuple(min(max(int(v), 0), 255) for v in c[:3])
+
+    def show(value):                    # [r, g, b] for all, or [[r, g, b], ...] one each
+        if value and isinstance(value[0], (list, tuple)):
+            for i, c in enumerate(value[:PIXEL_COUNT]):
+                strip[i] = colour(c)
+        else:
+            strip.fill(colour(value))
+
+    def off():
+        strip.fill((0, 0, 0))
+
+    off()
+    return show, off
+
+
+OUTPUT_SETUP = {
+    "piezo": setup_piezo,
+    "pixels": setup_pixels,
+}
+# The message key the sketch uses for each output.
+OUTPUT_KEYS = {"piezo": "beep", "pixels": "pixels"}
+
+
+def setup_outputs():
+    outputs = {}
+    for name in OUTPUTS:
+        try:
+            outputs[OUTPUT_KEYS[name]] = OUTPUT_SETUP[name]()
+            print(f"  {name:10} ready")
+        except Exception as e:          # e.g. library not installed: skip it, keep the rest
+            print(f"  {name:10} skipped: {e}")
+    return outputs
+
+
+outputs = {}  # message key -> (do, off), filled in by main()
+
+
+def act_on(message):
+    """A message from the sketch: do what it asks of each output."""
+    try:
+        data = json.loads(message)
+    except ValueError:
+        return
+    if not isinstance(data, dict):
+        return
+    for key, value in data.items():
+        if key not in outputs:
+            print(f"no output for {key!r}" + ("" if outputs else " (no outputs ready)"))
+            continue
+        try:
+            outputs[key][0](value)
+        except Exception as e:
+            print(f"{key}: {e}")
 
 
 def setup_parts():
@@ -173,6 +318,7 @@ async def handler(ws):
         async for message in ws:        # anything the sketch sends with sendToHardware()
             if SHOW_MESSAGES:
                 print("from browser:", message)
+            act_on(message)
     except websockets.ConnectionClosed:
         pass
     finally:
@@ -199,11 +345,21 @@ async def send_readings(readers):
 async def main():
     print("Setting up parts:")
     readers = setup_parts()
-    if not readers:
-        raise SystemExit("No parts ready: check WIRED and the wiring.")
+    print("Setting up outputs:")
+    outputs.update(setup_outputs())
+    if not readers and not outputs:
+        raise SystemExit("No parts ready: check WIRED, OUTPUTS and the wiring.")
     async with websockets.serve(handler, "0.0.0.0", PORT):
         print(f"Pi bridge running on ws://<this Pi>:{PORT}  (Ctrl+C to stop)")
         await send_readings(readers)
+
+
+def outputs_off():
+    for key, (do, off) in outputs.items():
+        try:
+            off()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
@@ -211,3 +367,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
+    finally:
+        outputs_off()                   # don't leave the piezo squealing or the pixels on

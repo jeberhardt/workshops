@@ -6,11 +6,13 @@
    The pins are planned so ALL the parts can be wired at once:
    no two parts share a GPIO pin.
 
-   The Pi has no analog inputs, so the analog parts (pots, LDR, mic,
-   joystick) go through an MCP3008 chip (8 channels, 10-bit ADC) on
-   the SPI pins. Turn SPI on first:
+   The Pi has no analog inputs, so analog parts need an ADC chip:
+   - the LDR (light sensor) uses an ADS1115 breakout on the I2C pins.
+     Turn I2C on first: sudo raspi-config → Interface Options → I2C
+   - the pots, mic and joystick go through an MCP3008 chip (8 channels,
+     10-bit ADC) on the SPI pins. Turn SPI on first:
      sudo raspi-config → Interface Options → SPI
-   Then gpiozero's MCP3008(channel=0).value gives 0..1 — send it as is.
+     Then gpiozero's MCP3008(channel=0).value gives 0..1 — send it as is.
 
    "Pin" = the physical pin on the header (1–40, pin 1 has a square pad).
    "GPIO" = the number your code uses (gpiozero, or RPi.GPIO in BCM mode).
@@ -18,7 +20,7 @@
 
 // Physical pin → what it is (the first 26 pins of the 40-pin header).
 const PIN_NAMES = {
-  1: '3.3V',  2: '5V',     3: 'GPIO2',  4: '5V',      5: 'GPIO3',  6: 'GND',
+  1: '3.3V',  2: '5V',     3: 'GPIO2 SDA', 4: '5V',   5: 'GPIO3 SCL', 6: 'GND',
   7: 'GPIO4', 8: 'GPIO14', 9: 'GND',   10: 'GPIO15', 11: 'GPIO17', 12: 'GPIO18',
   13: 'GPIO27', 14: 'GND', 15: 'GPIO22', 16: 'GPIO23', 17: '3.3V', 18: 'GPIO24',
   19: 'GPIO10 MOSI', 20: 'GND', 21: 'GPIO9 MISO', 22: 'GPIO25',
@@ -134,18 +136,23 @@ const WIRING = {
   slider: () => potWiring(0, slidePot()),
   knob:   () => potWiring(1, rotaryPot()),
 
+  // The LDR reads through an ADS1115 breakout on I2C (not the MCP3008).
   light: () => ({
-    plus: '3.3V', chip: true, height: 196,
-    parts: [ldr(60, 76)],
+    plus: '3.3V', height: 196,
+    parts: [ads1115(), ldr(250, 266)],
     wires: [
-      { pts: up([60, 150], PLUS_Y), color: WIRE.power, text: 'One LDR leg → + rail' },
-      { pts: [[76, 150], [76, 136], [165, 136], [165, 128]], color: WIRE.yellow, text: 'Other LDR leg → MCP3008 CH2' },
-      { pts: [[120, 136], [120, GND_Y]], color: WIRE.gnd, text: '10 kΩ resistor from that leg → − rail' },
+      { pts: up([138, 94], PLUS_Y), color: WIRE.power, text: 'ADS1115 VDD → + rail (3.3 V)' },
+      { pts: up([152, 94], GND_Y), color: WIRE.gnd, text: 'ADS1115 GND → − rail' },
+      { pi: 5, pts: fromPi(5, [166, 94], 44), color: WIRE.blue, text: 'ADS1115 SCL' },
+      { pi: 3, pts: fromPi(3, [180, 94], 40), color: WIRE.yellow, text: 'ADS1115 SDA' },
+      { pts: [[250, 150], [250, 144], [120, 144], [120, PLUS_Y]], color: WIRE.power, text: 'One LDR leg → + rail' },
+      { pts: [[266, 150], [266, 142], [290, 142], [290, 84], [222, 84], [222, 94]], color: WIRE.orange, text: 'Other LDR leg → ADS1115 A0' },
+      { pts: [[244, 84], [244, GND_Y]], color: WIRE.gnd, text: '10 kΩ resistor from A0 → − rail' },
     ],
-    extras: [resistor(120, 136, 120, GND_Y, '10kΩ'), junction(120, 136)],
+    extras: [resistor(244, 84, 244, GND_Y, '10kΩ'), junction(244, 84)],
     notes: [
-      'The LDR and the 10 kΩ resistor make a voltage divider: more light, higher reading.',
-      'gpiozero MCP3008(channel=2).value',
+      'The Pi has no analog inputs: the ADS1115 measures the voltage at A0 and sends it over I2C. Turn I2C on first: sudo raspi-config → Interface Options → I2C. Then i2cdetect -y 1 should show 48.',
+      'The LDR and the 10 kΩ resistor make a voltage divider: more light, higher voltage at A0. ADDR and ALRT stay unconnected. pi_bridge.py sends A0’s voltage ÷ 3.3, so 0..1.',
     ],
   }),
 
@@ -232,6 +239,14 @@ function mcp3008() {
        + `<text transform="translate(${x + 2} 120) rotate(-90)" font-size="5.5" fill="#ddd">CH${i}</text>`;
   }
   return s;
+}
+
+
+// The ADS1115 breakout (used by the LDR): 10 pins along its top edge.
+function ads1115() {
+  const names = ['VDD', 'GND', 'SCL', 'SDA', 'ADDR', 'ALRT', 'A0', 'A1', 'A2', 'A3'];
+  return part(128, 100, 150, 30, '#1f4fa0', names.map((n, i) => [n, 138 + i * 14]),
+    label(186, 124, 'ADS1115', '#fff', 7));
 }
 
 

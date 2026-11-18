@@ -48,6 +48,11 @@ loaded; changing step reloads the page.
   `test_server.py` (`readings()`) and the README's message-format section.
 - `INPUT_DEFS[].target` must be a key of `PROPS`.
 - Step 11 (Real hardware) is step 9 (Simulated sensors) plus `setupHardware()`, so their cards and drawing code must stay identical.
+  Step 12 (Outputs) is step 11 plus an Outputs card.
+- Output messages (`{"beep": {hz, ms}}`, `{"pixels": [r, g, b] | [[r, g, b], …]}`) are sent by `steps/step12.js` and handled
+  by `act_on()` in `pi_bridge.py` (`OUTPUT_KEYS` maps output names to message keys). The README's message-format
+  section documents them. NeoPixels use a different library on a Pi 5 and a Pi 3/4, and need root on a Pi 3/4, so
+  `control.py` starts the bridge with `sudo -E` there.
 - Each `STEPS` entry lists `globals`/`functions`. Over `file://` the Code view can't fetch the file, so it rebuilds
   the code from these names. It also assumes step constants are in CAPITALS (that's how it tells `const` from `let`).
 
