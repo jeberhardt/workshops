@@ -51,8 +51,10 @@ loaded; changing step reloads the page.
   `test_server.py` (`readings()`) and the README's message-format section.
 - `INPUT_DEFS[].target` must be a key of `PROPS`.
 - Step 11 (Real hardware) is step 9 (Simulated sensors) plus `setupHardware()`, so their cards and drawing code must stay identical.
-  Step 12 (Outputs) is step 11 plus an Outputs card.
-- Output messages (`{"beep": {hz, ms}}`, `{"pixels": [r, g, b] | [[r, g, b], …]}`) are sent by `steps/step12.js` and handled
+  Step 12 (Outputs) has no sensor cards: a Buzzer button drawn on the canvas (held = `{beep: {hz}}`, released =
+  `{beep: false}`), `setupHardware()`, and an Outputs card with the NeoPixel buttons and the wiring for the buzzer
+  and NeoPixels (`outputWiring()` in `wiring.js`).
+- Output messages (`{"beep": {hz, ms}}`, `{"beep": {hz}}` held until `{"beep": false}`, `{"pixels": [r, g, b] | [[r, g, b], …]}`) are sent by `steps/step12.js` and handled
   by `act_on()` in `pi_bridge.py` (`OUTPUT_KEYS` maps output names to message keys). The README's message-format
   section documents them. The pins (buzzer GPIO13, NeoPixels GPIO10 over SPI with
   `neopixel_spi`, no sudo, every model) follow the slide deck (`slides/outputs-overview.html`, `slides/button-pin.html`),

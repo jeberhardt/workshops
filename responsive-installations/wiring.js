@@ -2,7 +2,8 @@
    wiring.js — HOW TO WIRE EACH PART TO THE RASPBERRY PI
    -----------------------------------------------------------------
    Every card has a "Wiring" section with a breadboard diagram
-   (Fritzing style), the list of wires and any gotchas.
+   (Fritzing style), the list of wires and any gotchas. The Outputs
+   step's card has one for the NeoPixels and one for the buzzer.
    The pins are planned so ALL the parts can be wired at once:
    no two parts share a GPIO pin.
 
@@ -18,13 +19,16 @@
    "GPIO" = the number your code uses (gpiozero, or RPi.GPIO in BCM mode).
    ================================================================= */
 
-// Physical pin → what it is (the first 26 pins of the 40-pin header).
+// Physical pin → what it is, on the 40-pin header.
 const PIN_NAMES = {
   1: '3.3V',  2: '5V',     3: 'GPIO2 SDA', 4: '5V',   5: 'GPIO3 SCL', 6: 'GND',
   7: 'GPIO4', 8: 'GPIO14', 9: 'GND',   10: 'GPIO15', 11: 'GPIO17', 12: 'GPIO18',
   13: 'GPIO27', 14: 'GND', 15: 'GPIO22', 16: 'GPIO23', 17: '3.3V', 18: 'GPIO24',
   19: 'GPIO10 MOSI', 20: 'GND', 21: 'GPIO9 MISO', 22: 'GPIO25',
   23: 'GPIO11 SCLK', 24: 'GPIO8 CE0', 25: 'GND', 26: 'GPIO7 CE1',
+  27: 'ID_SD', 28: 'ID_SC', 29: 'GPIO5', 30: 'GND', 31: 'GPIO6', 32: 'GPIO12',
+  33: 'GPIO13', 34: 'GND', 35: 'GPIO19', 36: 'GPIO16', 37: 'GPIO26', 38: 'GPIO20',
+  39: 'GND', 40: 'GPIO21',
 };
 
 const WIRE = {
@@ -37,10 +41,15 @@ const BANDS = {
   '1kΩ':  ['#7b4a1e', '#111', '#d7263d'],
   '2kΩ':  ['#d7263d', '#111', '#d7263d'],
   '10kΩ': ['#7b4a1e', '#111', '#f77f00'],
+  '330Ω': ['#f77f00', '#f77f00', '#7b4a1e'],
 };
 
-// The drawing is 300 units wide. The Pi header runs along the top,
-// with the breadboard's power rails just under it.
+// Layout: the Pi's 40-pin header stands on the left, pin 1 at the top, and the
+// breadboard is on its right, with the + and − rails running beside the header.
+// The coordinates below are written along the header (x: down the header, from
+// pin 1 to pin 40) and away from it (y: from the header towards the parts).
+// drawWiring() flips the picture across its diagonal to stand the header up,
+// and label() keeps text upright.
 const PLUS_Y = 48;   // + rail
 const GND_Y  = 56;   // − rail
 const RAIL_PINS = { '3.3V': 1, '5V': 2 };   // which Pi pin feeds the + rail
@@ -159,7 +168,7 @@ const WIRING = {
   sound: () => ({
     plus: '3.3V', chip: true, height: 196,
     parts: [part(20, 156, 90, 30, '#1f3d7a', [['OUT', 50], ['GND', 64], ['VCC', 78]],
-      svgCircle(94, 172, 9, '#222', '#999') + label(26, 181, 'MAX4466', '#fff'))],
+      svgCircle(94, 172, 9, '#222', '#999') + label(36, 158, 'MAX4466', '#fff', 5.5))],
     wires: [
       { pts: [[50, 150], [50, 136], [175, 136], [175, 128]], color: WIRE.yellow, text: 'OUT → MCP3008 CH3' },
       { pts: up([64, 150], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
@@ -185,6 +194,49 @@ const WIRING = {
     notes: [
       'Power it from 3.3 V even though the pin says +5V: then it can never send the chip more than it can read.',
       'SW is a push button under the stick: wire it like the button card (a free GPIO pin + GND) if you want it.',
+    ],
+  }),
+
+  // --- Outputs (the Outputs step) ---
+
+  // Three NeoPixel boards in a chain: the data goes in DIN and out DOUT to the next one.
+  pixels: () => ({
+    plus: '5V', height: 158,
+    parts: [pixelBoard(118, '#ff4d4d'), pixelBoard(178, '#4dff88'), pixelBoard(238, '#4d8bff')],
+    wires: [
+      { pi: 19, pts: fromPi(19, [127, 106], 90), color: WIRE.green, text: '330 Ω resistor → first pixel DIN' },
+      { pts: up([139, 106], PLUS_Y), color: WIRE.power, text: 'Every pixel’s 5V → + rail (5 V)' },
+      { pts: up([199, 106], PLUS_Y), color: WIRE.power },
+      { pts: up([259, 106], PLUS_Y), color: WIRE.power },
+      { pts: up([151, 106], GND_Y), color: WIRE.gnd, text: 'Every pixel’s GND → − rail' },
+      { pts: up([211, 106], GND_Y), color: WIRE.gnd },
+      { pts: up([271, 106], GND_Y), color: WIRE.gnd },
+      { pts: [[163, 106], [163, 100], [187, 100], [187, 106]], color: WIRE.yellow, text: 'Pixel 1 DOUT → pixel 2 DIN' },
+      { pts: [[223, 106], [223, 100], [247, 100], [247, 106]], color: WIRE.yellow, text: 'Pixel 2 DOUT → pixel 3 DIN (pixel 3’s DOUT stays empty)' },
+    ],
+    extras: [resistor(pinX(19) + 7, 58, pinX(19) + 7, 84, '330Ω')],   // + 7: on the wire, which steps between the pins
+    notes: [
+      'The data goes one way: into DIN, out of DOUT, into the next pixel’s DIN. Many boards have an arrow showing the way. Pin order differs between boards: follow the labels printed on yours.',
+      'Pin 19 is the SPI data pin, so SPI must be on (./workshop install turns it on). Three pixels can run from the Pi’s 5 V; if the first one flickers, add a 74AHCT125 level shifter on the data line.',
+    ],
+  }),
+
+  // A passive buzzer, switched by a transistor: the GPIO pin only turns the transistor on and off.
+  buzzer: () => ({
+    plus: '5V', height: 160,
+    parts: [transistor(), part(270, 120, 54, 30, '#1a1a1a', [['−', 284], ['+', 310]],
+      svgCircle(297, 136, 9, '#2c2c2c', '#555') + svgCircle(297, 136, 2, '#000'))],
+    wires: [
+      { pi: 33, pts: fromPi(33, [212, 114], 96), color: WIRE.orange, text: '1 kΩ resistor → transistor B (middle leg)' },
+      { pts: up([200, 114], GND_Y), color: WIRE.gnd, text: 'Transistor E → − rail' },
+      { pts: [[224, 114], [224, 104], [284, 104], [284, 114]], color: WIRE.yellow, text: 'Transistor C → buzzer −' },
+      { pts: up([310, 114], PLUS_Y), color: WIRE.power, text: 'Buzzer + → + rail (5 V)' },
+    ],
+    extras: [resistor(pinX(33) + 7, 58, pinX(33) + 7, 88, '1kΩ'),   // + 7: on the wire, which steps between the pins
+             diode(284, 310, 104), junction(284, 104), junction(310, 104)],
+    notes: [
+      'The buzzer needs more current than a GPIO pin should give, so the pin only switches the PN2222A transistor, through the 1 kΩ resistor. Hold the transistor with its flat side facing you: the legs are E, B, C from left to right.',
+      'The 1N4148 diode goes across the buzzer, with its stripe towards + (5 V). It soaks up the spike when the buzzer switches off. Use a passive buzzer: an active one only beeps at one pitch.',
     ],
   }),
 };
@@ -231,12 +283,12 @@ function chipWires() {
 function mcp3008() {
   let s = `<rect x="138" y="88" width="84" height="34" rx="2" fill="#262626"/>`
         + `<circle cx="138" cy="105" r="4" fill="#3a3a3a"/>`
-        + label(228, 103, 'MCP3008', '#333', 7) + label(228, 112, 'ADC', '#777', 6);
+        + label(232, 88, 'MCP3008', '#333', 7) + label(240, 88, 'ADC', '#777', 6);
   for (let i = 0; i < 8; i++) {
     const x = chX(i);
     s += leg(x, 82, 88) + leg(x, 122, 128)
-       + `<text transform="translate(${x + 2} 90) rotate(-90)" text-anchor="end" font-size="5.5" fill="#ddd">${CHIP_TOP[i]}</text>`
-       + `<text transform="translate(${x + 2} 120) rotate(-90)" font-size="5.5" fill="#ddd">CH${i}</text>`;
+       + label(x + 2, 90, CHIP_TOP[i], '#ddd', 5)
+       + label(x + 2, 120, `CH${i}`, '#ddd', 5, 'end');
   }
   return s;
 }
@@ -245,28 +297,31 @@ function mcp3008() {
 // The ADS1115 breakout (used by the LDR): 10 pins along its top edge.
 function ads1115() {
   const names = ['VDD', 'GND', 'SCL', 'SDA', 'ADDR', 'ALRT', 'A0', 'A1', 'A2', 'A3'];
-  return part(128, 100, 150, 30, '#1f4fa0', names.map((n, i) => [n, 138 + i * 14]),
-    label(186, 124, 'ADS1115', '#fff', 7));
+  return part(128, 100, 150, 40, '#1f4fa0', names.map((n, i) => [n, 138 + i * 14]),
+    label(205, 119, 'ADS1115', '#fff', 5.5));
 }
 
 
 // -----------------------------------------------------------------
 // Wire routing
 // -----------------------------------------------------------------
-// Pin n on the header. Odd pins are the inner row (lower), even the outer row.
+// Pin n on the header: x along the header, y across it. Odd pins (1, 3, …) are the
+// column further from the breadboard, even pins the nearer one, as on the real Pi.
 const pinX = n => 46 + Math.floor((n - 1) / 2) * 14;
-const pinY = n => n % 2 ? 22 : 12;
+const pinY = n => n % 2 ? 12 : 22;
 
-// A wire from Pi pin n down to `to` ([x, y], or just a y to drop straight down).
-// With `lane` it drops to that height, runs across, then drops onto the target.
-// Wires from the outer row step sideways first so they pass between the inner pins.
+// A wire from Pi pin n out to `to` ([x, y], or just a y to go straight out).
+// With `lane` it goes out to that distance, runs along, then onto the target.
+// Wires from the far (odd) column step between the near pins first.
 function fromPi(n, to, lane) {
   const pts = [[pinX(n), pinY(n)]];
   let x = pinX(n);
-  if (n % 2 === 0) { x += 7; pts.push([x, pinY(n)]); }
+  if (n % 2 === 1) { x += 7; pts.push([x, pinY(n)]); }
   const [tx, ty] = Array.isArray(to) ? to : [x, to];
-  if (lane == null) pts.push([x, ty]);
-  else pts.push([x, lane], [tx, lane], [tx, ty]);
+  if (lane == null) {
+    if (x !== tx) pts.push([x, 31], [tx, 31]);   // back in line once clear of the pins
+    pts.push([tx, ty]);
+  } else pts.push([x, lane], [tx, lane], [tx, ty]);
   return pts;
 }
 
@@ -285,8 +340,10 @@ function svgCircle(cx, cy, r, fill, stroke) {
   return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"${stroke ? ` stroke="${stroke}"` : ''}/>`;
 }
 
-function label(x, y, text, fill, size = 6) {
-  return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}">${text}</text>`;
+// Text starting at (x, y), written upright in the finished picture: it runs
+// across the page (along y in these coordinates), with x as its baseline.
+function label(x, y, text, fill, size = 6, anchor = 'start') {
+  return `<text transform="matrix(0 1 1 0 ${x} ${y})" font-size="${size}" text-anchor="${anchor}" fill="${fill}">${text}</text>`;
 }
 
 // A component body with legs sticking up from its top edge.
@@ -295,7 +352,7 @@ function part(x, y, w, h, fill, pins, inner = '', ink = '#fff') {
   let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${fill}" stroke="#0003"/>` + inner;
   for (const [name, px] of pins) {
     s += leg(px, y - 6, y + 1)
-       + `<text x="${px}" y="${y + 8}" font-size="5" text-anchor="middle" fill="${ink}">${name}</text>`;
+       + label(px + 1.8, y + 3, name, ink, 5);
   }
   return s;
 }
@@ -320,7 +377,28 @@ function ldr(x1, x2) {
   return leg(x1, 150, 162) + leg(x2, 150, 162)
     + svgCircle(cx, 168, 10, '#e9a23b', '#b97a1f')
     + `<path d="M${cx - 6} 164 h3 v4 h3 v-4 h3 v4 h3" fill="none" stroke="#8a4b0f" stroke-width="1.2"/>`
-    + label(cx - 6, 189, 'LDR', '#333');
+    + label(cx + 2, 181, 'LDR', '#333');
+}
+
+// One NeoPixel breakout board: four legs (DIN, 5V, GND, DOUT) and its LED.
+function pixelBoard(x, glow) {
+  return part(x, 112, 54, 34, '#1a1a1a', [['DIN', x + 9], ['5V', x + 21], ['GND', x + 33], ['DOUT', x + 45]],
+    `<rect x="${x + 20}" y="130" width="14" height="14" rx="1.5" fill="#f4f4f0"/>` + svgCircle(x + 27, 137, 4, glow));
+}
+
+// The PN2222A transistor (TO-92), flat side facing you: legs E, B, C.
+function transistor() {
+  return part(192, 120, 40, 34, '#222', [['E', 200], ['B', 212], ['C', 224]],
+    label(214, 129, 'PN2222A', '#ccc', 5));
+}
+
+// A diode with its legs from x1 to x2 (both on wires), its stripe at the x2 end.
+function diode(x1, x2, y) {
+  const cx = (x1 + x2) / 2;
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#9aa0a6" stroke-width="1.6"/>`
+    + `<rect x="${cx - 7}" y="${y - 3}" width="14" height="6" rx="1.5" fill="#1a1a1a"/>`
+    + `<rect x="${cx + 3}" y="${y - 3}" width="2" height="6" fill="#ddd"/>`
+    + label(cx + 2, y - 6, '1N4148', '#333', 5.5, 'end');
 }
 
 // A resistor sitting on a straight wire segment, with its value written beside it.
@@ -337,8 +415,8 @@ function resistor(x1, y1, x2, y2, value) {
     ? `<rect x="${cx - 9}" y="${cy - 3}" width="18" height="6" rx="2" fill="#d9b38c" stroke="#a07e58" stroke-width=".6"/>`
     : `<rect x="${cx - 3}" y="${cy - 9}" width="6" height="18" rx="2" fill="#d9b38c" stroke="#a07e58" stroke-width=".6"/>`;
   const text = across
-    ? `<text x="${cx}" y="${cy - 6}" font-size="6" text-anchor="middle" fill="#333">${value}</text>`
-    : `<text x="${cx - 6}" y="${cy + 2}" font-size="6" text-anchor="end" fill="#333">${value}</text>`;
+    ? label(cx + 2, cy + 6, value, '#333')
+    : label(cx - 6, cy, value, '#333', 6, 'middle');
   return body + bands + text;
 }
 
@@ -353,24 +431,25 @@ function wire(pts, color) {
        + ends;
 }
 
-// The Pi's corner with pins 1–26; pins this diagram uses are bright.
+// The Pi's 40-pin header; the pins this diagram uses are bright.
+const HEADER_END = 330;   // where the header ends, along it
 function piHeader(used) {
-  let s = `<rect x="28" y="0" width="268" height="34" rx="4" fill="#1d6b3a"/>`
-        + `<rect x="39" y="5" width="183" height="24" rx="2" fill="#1a1a1a"/>`;
-  for (let n = 1; n <= 26; n++) {
+  let s = `<rect x="28" y="0" width="${HEADER_END - 28}" height="34" rx="4" fill="#1d6b3a"/>`
+        + `<rect x="39" y="5" width="${pinX(40) + 7 - 39}" height="24" rx="2" fill="#1a1a1a"/>`;
+  for (let n = 1; n <= 40; n++) {
     s += `<rect x="${pinX(n) - 2.5}" y="${pinY(n) - 2.5}" width="5" height="5" rx="${n === 1 ? 0 : 1}" fill="${used.has(n) ? '#ffd166' : '#7d6d45'}"/>`;
   }
   return s
-    + label(32, 24, '1', '#cfe8d6') + label(32, 14, '2', '#cfe8d6')
-    + label(225, 24, '25', '#cfe8d6') + label(225, 14, '26', '#cfe8d6')
-    + label(242, 17, 'Raspberry Pi', '#fff', 7) + label(242, 26, 'pins 1–26 of 40', '#cfe8d6', 5);
+    + label(38, pinY(1), '1', '#cfe8d6', 6, 'middle') + label(38, pinY(2), '2', '#cfe8d6', 6, 'middle')
+    + label(326, pinY(39), '39', '#cfe8d6', 5, 'middle') + label(326, pinY(40), '40', '#cfe8d6', 5, 'middle')
+    + label(14, 2, 'Raspberry Pi', '#1d6b3a', 6.5);
 }
 
-function rails(plus) {
-  let s = `<line x1="34" y1="${GND_Y}" x2="296" y2="${GND_Y}" stroke="#3a6ee8" stroke-width="1"/>`
-        + label(4, GND_Y + 2, 'GND', '#3a6ee8');
-  if (plus) s += `<line x1="34" y1="${PLUS_Y}" x2="296" y2="${PLUS_Y}" stroke="#d7263d" stroke-width="1"/>`
-               + label(4, PLUS_Y + 2, '+' + plus, '#d7263d');
+function rails(plus, length) {
+  let s = `<line x1="34" y1="${GND_Y}" x2="${length - 4}" y2="${GND_Y}" stroke="#3a6ee8" stroke-width="1"/>`
+        + label(30, GND_Y, 'GND', '#3a6ee8', 5.5, 'middle');
+  if (plus) s += `<line x1="34" y1="${PLUS_Y}" x2="${length - 4}" y2="${PLUS_Y}" stroke="#d7263d" stroke-width="1"/>`
+               + label(22, PLUS_Y, '+' + plus, '#d7263d', 5.5, 'middle');
   return s;
 }
 
@@ -390,17 +469,19 @@ function drawWiring(id) {
   const all = [...feeds, ...chip, ...d.wires];
   const used = new Set(all.filter(w => w.pi).map(w => w.pi));
 
-  const W = 300, H = d.height;
-  const svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Breadboard wiring diagram" font-family="system-ui, sans-serif">`
+  // L: along the header (the finished picture's height). H: across it (its width).
+  const L = HEADER_END + 10, H = d.height;
+  const svg = `<svg viewBox="0 0 ${H} ${L}" role="img" aria-label="Breadboard wiring diagram" font-family="system-ui, sans-serif">`
     + `<defs><pattern id="holes-${id}" width="7" height="7" patternUnits="userSpaceOnUse">`
     + `<circle cx="3.5" cy="3.5" r=".9" fill="#0002"/></pattern></defs>`
-    + `<rect width="${W}" height="${H}" rx="8" fill="#ece8dc"/>`
-    + `<rect y="38" width="${W}" height="${H - 46}" fill="url(#holes-${id})"/>`
-    + piHeader(used) + rails(d.plus)
+    + `<g transform="matrix(0 1 1 0 0 0)">`   // flip across the diagonal: the header stands up on the left
+    + `<rect width="${L}" height="${H}" rx="8" fill="#ece8dc"/>`
+    + `<rect y="38" width="${L}" height="${H - 46}" fill="url(#holes-${id})"/>`
+    + piHeader(used) + rails(d.plus, L)
     + d.parts.join('') + (d.chip ? mcp3008() : '')
     + all.map(w => wire(w.pts, w.color)).join('')
     + (d.extras || []).join('')
-    + '</svg>';
+    + '</g></svg>';
 
   const rows = list => list.filter(w => w.text).map(w => ({
     color: w.color,
@@ -410,10 +491,10 @@ function drawWiring(id) {
 }
 
 // The "Wiring" section at the bottom of a card (drawn the first time it opens).
-function wiringPanel(def) {
+function wiringPanel(def, title = 'Wiring') {
   if (!WIRING[def.id]) return null;
   const box = el('details', 'wiring');
-  box.append(el('summary', null, 'Wiring'));
+  box.append(el('summary', null, title));
   box.addEventListener('toggle', () => {
     if (!box.open || box.children.length > 1) return;
     const w = drawWiring(def.id);
@@ -441,4 +522,12 @@ function wireList(rows) {
     ul.append(li);
   }
   return ul;
+}
+
+// The Outputs step's card: a Wiring section for each output.
+function outputWiring() {
+  const box = el('div');
+  box.append(wiringPanel({ id: 'pixels' }, 'Wiring: NeoPixels'),
+             wiringPanel({ id: 'buzzer' }, 'Wiring: buzzer'));
+  return box;
 }

@@ -50,7 +50,7 @@ On steps with input cards (9–11), the Code view has a second, read-only tab, *
 10. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
     *Hidden for now (`hidden: true` in `steps.js`), so the menu shows Real hardware as step 10.*
 11. **Real hardware** — step 9 plus `setupHardware()`: the same three parts doing the same things, now with readings from the Pi, and wiring diagrams.
-12. **Outputs** — the sketch talks back: buttons send `sendToHardware()` messages, and the Pi beeps a buzzer and lights 3 NeoPixels (see *Outputs* below).
+12. **Outputs** — the sketch talks back: wire a buzzer and 3 NeoPixels (the Outputs card has their Wiring diagrams), then hold the Buzzer button on the screen to sound the buzzer, and use the card's buttons to light the pixels; each sends a `sendToHardware()` message (see *Outputs* below).
 
 To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`. To hide one without deleting it, add `hidden: true` to its line.
 A step gets input cards with `buildControlPanel(PROPS)` (or `buildControlPanel(null, ['slider', …])` for a few cards
@@ -155,7 +155,9 @@ For example, proximity is set up for centimetres (200 cm = far, 2 cm = close), a
 Digital inputs accept 0/1, HIGH/LOW, on/off or true/false.
 To send something back to the Pi, call `sendToHardware({...})`. `pi_bridge.py` understands:
 ```
-{"beep": {"hz": 880, "ms": 300}}                     the buzzer plays a note (55–3520 Hz, up to 5 s)
+{"beep": {"hz": 880, "ms": 300}}                     the buzzer plays a note (55–3520 Hz) for 300 ms (up to 10 s)
+{"beep": {"hz": 880}}                                the buzzer plays until it gets {"beep": false} (or for 10 s at most)
+{"beep": false}                                      the buzzer stops
 {"pixels": [255, 120, 0]}                            every NeoPixel one colour; [0, 0, 0] = off
 {"pixels": [[255, 0, 0], [0, 255, 0], [0, 0, 255]]}  one colour per pixel
 ```
@@ -192,7 +194,7 @@ The Pi has no analog inputs, so analog parts go through an ADC chip:
   The NeoPixels' data also goes out on pin 19, so use the MCP3008 or the NeoPixels, not both at once.
 
 ## Outputs
-The Outputs step drives two parts on the Pi. They have no Wiring diagrams yet, so here are the connections:
+The Outputs step drives two parts on the Pi. The Outputs card has a Wiring diagram for each; here are the connections:
 
 | Part | Connects to | Power |
 |---|---|---|

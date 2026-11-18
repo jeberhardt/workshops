@@ -177,12 +177,19 @@ def setup_buzzer():
     low, high = buzzer.min_tone.frequency, buzzer.max_tone.frequency
     timer = None
 
-    def beep(value):                    # {"hz": 880, "ms": 300}
+    def beep(value):
+        # {"hz": 880, "ms": 300}  plays for 300 ms
+        # {"hz": 880}             plays until {"beep": false} (held buttons)
+        # false                   stops
         nonlocal timer
-        hz = min(max(float(value.get("hz", 880)), low), high)
-        ms = min(max(float(value.get("ms", 300)), 10), 5000)
         if timer:
-            timer.cancel()              # a new beep replaces one still playing
+            timer.cancel()              # a new message replaces a note still playing
+        if not value:
+            buzzer.stop()
+            return
+        hz = min(max(float(value.get("hz", 880)), low), high)
+        # No ms: keep playing, but stop after 10 s anyway, in case the "stop" never arrives.
+        ms = min(max(float(value.get("ms", 10000)), 10), 10000)
         buzzer.play(Tone.from_frequency(hz))
         timer = threading.Timer(ms / 1000, buzzer.stop)
         timer.start()
