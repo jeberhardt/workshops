@@ -105,6 +105,11 @@ Each server has **Start**, **Stop** and **Restart** buttons, and a window showin
 Stop sends Ctrl+C, just like stopping it in a terminal, so `pi_bridge.py` releases the pins properly.
 After editing `pi_bridge.py`, press **Restart** to load your changes.
 
+While a browser is connected, the bridge's window shows the messages: `to browser:` with the readings that changed
+(pressing the button prints `{"button": 1}`, letting go `{"button": 0}`) and `from browser:` for anything the sketch sends back.
+The settings are at the top of `pi_bridge.py` (press **Restart** after changing them): `SHOW_EVERY_READING = True` prints
+every reading, 30 a second; `SHOW_MESSAGES = False` prints none.
+
 Want fake readings instead? **Stop** the bridge first, then run `python test_server.py` yourself.
 Both use port 8765, and only one can use it at a time ("address already in use" means the other is still running).
 

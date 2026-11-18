@@ -31,6 +31,12 @@ except ImportError:
 
 PORT = 8765
 RATE = 30  # messages per second
+# What to print about the messages (it shows in the control panel's bridge window):
+SHOW_MESSAGES = True   # print messages to and from the browser
+SHOW_EVERY_READING = False  # False: only the readings that changed. True: all 30 a second
+# How much a reading must change to be printed (digital parts: any change).
+SHOW_CHANGE = {"proximity": 2.0}  # cm
+SHOW_CHANGE_DEFAULT = 0.02        # for 0..1 readings
 
 # The parts you have wired. Comment out the ones you haven't.
 # The workshop's Real hardware step uses the button, the ultrasonic sensor and the LDR;
@@ -139,14 +145,34 @@ def readings(readers):
 
 
 clients = set()
+last_shown = {}  # the readings last printed, to spot what changed
+
+
+def show_readings(message):
+    """Print the readings sent to the browser: all of them, or just what changed."""
+    if not SHOW_MESSAGES:
+        return
+    if SHOW_EVERY_READING:
+        print("to browser:  ", json.dumps(message))
+        return
+    changed = {}
+    for name, value in message.items():
+        before = last_shown.get(name)
+        if before is None or abs(value - before) >= SHOW_CHANGE.get(name, SHOW_CHANGE_DEFAULT):
+            changed[name] = value
+    if changed:
+        last_shown.update(changed)
+        print("to browser:  ", json.dumps(changed))
 
 
 async def handler(ws):
     clients.add(ws)
+    last_shown.clear()                  # so the next readings print in full
     print(f"browser connected ({len(clients)} open)")
     try:
         async for message in ws:        # anything the sketch sends with sendToHardware()
-            print("from browser:", message)
+            if SHOW_MESSAGES:
+                print("from browser:", message)
     except websockets.ConnectionClosed:
         pass
     finally:
@@ -159,7 +185,9 @@ async def send_readings(readers):
         tick = time.monotonic()
         if clients:
             # Reading takes a little while (the sound window), so do it off the event loop.
-            message = json.dumps(await asyncio.to_thread(readings, readers))
+            reading = await asyncio.to_thread(readings, readers)
+            show_readings(reading)
+            message = json.dumps(reading)
             for ws in list(clients):
                 try:
                     await ws.send(message)
