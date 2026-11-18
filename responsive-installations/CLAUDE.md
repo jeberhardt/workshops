@@ -18,6 +18,9 @@ python test_server.py                  # fake sensor readings on ws://localhost:
 python pi_bridge.py                    # on the Pi: reads the wired parts with gpiozero
 ```
 `gpiozero` is deliberately not in `requirements.txt`: it comes from Raspberry Pi OS via `--system-site-packages`.
+On a Pi, `./workshop install` does all the setup: the venv, `requirements.txt` + `requirements-pi.txt` (Pi-only libraries),
+the NeoPixel library for the model, I2C/SPI, sound off on a Pi 3/4, and the control panel. A new Pi-only library goes in
+`requirements-pi.txt`; a model-specific one goes in `install_packages()` in `workshop`.
 
 **Checking JS changes:** `node --check` on a single file is not enough. The page's classic scripts share one global
 scope, so a top-level name declared in two of them makes the browser reject a whole script (this has broken the page before).

@@ -90,16 +90,16 @@ const WIRING = {
       transducer(116, 152) + transducer(184, 152))],
     wires: [
       { pts: up([129, 120], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (5 V)' },
-      { pi: 18, pts: fromPi(18, [143, 120], 72), color: WIRE.green, text: 'TRIG' },
+      { pi: 16, pts: fromPi(16, [143, 120], 72), color: WIRE.green, text: 'TRIG' },
       { pts: [[157, 120], [157, 104], [193, 104]], color: WIRE.orange, text: 'ECHO → 1 kΩ resistor → junction' },
-      { pi: 22, pts: fromPi(22, [193, 104]), color: WIRE.purple, text: 'the junction between the resistors' },
+      { pi: 18, pts: fromPi(18, [193, 104], 90), color: WIRE.purple, text: 'the junction between the resistors (ECHO)' },
       { pts: [[193, 104], [250, 104], [250, GND_Y]], color: WIRE.gnd, text: 'Junction → 2 kΩ resistor → − rail' },
       { pts: [[171, 120], [171, 114], [262, 114], [262, GND_Y]], color: WIRE.gnd, text: 'GND → − rail' },
     ],
     extras: [resistor(157, 104, 193, 104, '1kΩ'), resistor(193, 104, 250, 104, '2kΩ'), junction(193, 104)],
     notes: [
       'The HC-SR04 needs 5 V, and its ECHO pin answers with 5 V: too much for a GPIO pin. The 1 kΩ + 2 kΩ divider brings it down to 3.3 V. Never wire ECHO straight to the Pi.',
-      'No 2 kΩ? Use two 1 kΩ in a row, or 2.2 kΩ. gpiozero DistanceSensor(echo=25, trigger=24): send distance × 100 (cm).',
+      'No 2 kΩ? Use two 1 kΩ in a row, or 2.2 kΩ. gpiozero DistanceSensor(echo=24, trigger=23): send distance × 100 (cm).',
     ],
   }),
 
@@ -120,12 +120,12 @@ const WIRING = {
 
   touch: () => ({
     plus: '3.3V', height: 146,
-    parts: [part(119, 102, 64, 34, '#c62828', [['VCC', 133], ['SIG', 151], ['GND', 169]],
-      svgCircle(151, 124, 8, '#e8a0a0', '#fff'))],
+    parts: [part(161, 102, 64, 34, '#c62828', [['VCC', 175], ['SIG', 193], ['GND', 211]],
+      svgCircle(193, 124, 8, '#e8a0a0', '#fff'))],
     wires: [
-      { pts: up([133, 96], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (3.3 V)' },
-      { pi: 16, pts: fromPi(16, [151, 96]), color: WIRE.blue, text: 'SIG (also marked I/O or OUT)' },
-      { pts: up([169, 96], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
+      { pts: up([175, 96], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (3.3 V)' },
+      { pi: 22, pts: fromPi(22, [193, 96]), color: WIRE.blue, text: 'SIG (also marked I/O or OUT)' },
+      { pts: up([211, 96], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
     ],
     notes: [
       'A TTP223 touch module: SIG goes HIGH while touched. Power it from 3.3 V so its output is safe for the Pi.',

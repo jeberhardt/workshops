@@ -55,9 +55,9 @@ SHOW_CHANGE_DEFAULT = 0.02        # for 0..1 readings
 WIRED = [
     "button",     # GPIO17 (pin 11) + GND
     # "switch",     # GPIO27 (pin 13) + GND
-    "proximity",  # HC-SR04: TRIG GPIO24 (pin 18), ECHO via divider GPIO25 (pin 22)
+    "proximity",  # HC-SR04: TRIG GPIO23 (pin 16), ECHO via divider GPIO24 (pin 18)
     # "pir",        # HC-SR501 OUT GPIO22 (pin 15)
-    # "touch",      # TTP223 SIG GPIO23 (pin 16)
+    # "touch",      # TTP223 SIG GPIO25 (pin 22)
     # "slider",     # MCP3008 CH0
     # "knob",       # MCP3008 CH1
     "light",      # ADS1115 A0, on I2C: SDA pin 3, SCL pin 5
@@ -91,7 +91,7 @@ def setup_proximity():
     # Sends centimetres; HW_RANGES in hardware.js turns 200..2 cm into 0..1.
     # gpiozero waits until it has heard enough echoes, so a sensor that's
     # unplugged would freeze every other part. Read it on its own thread instead.
-    d = DistanceSensor(echo=25, trigger=24, max_distance=2)
+    d = DistanceSensor(echo=24, trigger=23, max_distance=2)
     latest = {"cm": 200.0}              # "far" until the first echo comes back
     def keep_reading():
         while True:
@@ -105,7 +105,7 @@ def setup_pir():
     return lambda: 1 if m.motion_detected else 0
 
 def setup_touch():
-    t = DigitalInputDevice(23)          # the TTP223 drives SIG HIGH while touched
+    t = DigitalInputDevice(25)          # the TTP223 drives SIG HIGH while touched
     return lambda: t.value
 
 def setup_adc(channel):

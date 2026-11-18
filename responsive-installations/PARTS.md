@@ -23,8 +23,7 @@ and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels*
 | 1 | Raspberry Pi with a 40-pin header | Any model with Wi-Fi (e.g. Pi 3B+, 4, 5, or Zero 2 W with a soldered header) |
 | 1 | microSD card, 16 GB or more | Raspberry Pi OS (Bookworm or later), which includes `gpiozero` |
 | 1 | Pi power supply | The official supply for your model |
-| — | I2C turned on | `sudo raspi-config` → Interface Options → I2C (needed for the ADS1115) |
-| — | `adafruit-blinka`, `adafruit-circuitpython-ads1x15` | `pip install` in the venv, for the ADS1115 |
+| — | I2C turned on, and the Python packages | `./workshop install` does both (and the NeoPixel library); see the README |
 
 ## Prototyping
 | Qty | Item | Notes |
@@ -43,7 +42,7 @@ and for the *Outputs* step (step 11 in the menu): a **piezo** and **3 NeoPixels*
 | Qty | Part | Connects to | Power |
 |---|---|---|---|
 | 1 | Tactile push button | GPIO17 (pin 11) + GND | none (internal pull-up) |
-| 1 | **HC-SR04** ultrasonic distance sensor | TRIG → GPIO24 (pin 18), ECHO → divider → GPIO25 (pin 22) | 5 V |
+| 1 | **HC-SR04** ultrasonic distance sensor | TRIG → GPIO23 (pin 16), ECHO → divider → GPIO24 (pin 18) | 5 V |
 | 1 | LDR (CdS photoresistor) | ADS1115 A0 (SDA → pin 3, SCL → pin 5) | 3.3 V |
 
 ## Outputs (for the Outputs step)

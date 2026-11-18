@@ -18,9 +18,10 @@ Every input can be connected to any property of the circle or its animation.
 | `index.html`, `style.css` | Page and panel styling | Rarely |
 | `pi_bridge.py` | The real Pi bridge: reads the wired parts with gpiozero, sends them to the sketch | List your wired parts in `WIRED` |
 | `test_server.py` | Fake "Raspberry Pi" for testing without hardware | Rarely |
-| `requirements.txt` | Python packages the servers need | Add packages here |
+| `requirements.txt` | Python packages the servers need, on the Pi and on a laptop | Add packages here |
+| `requirements-pi.txt` | Python packages only the Pi needs (Blinka, the ADS1115 library) | Add Pi-only packages here |
 | `control.py` | Control panel on the Pi (port 8080): start, stop and watch each server from a browser | Rarely |
-| `workshop` | Installs the control panel; also starts and stops the servers from a terminal | Rarely |
+| `workshop` | `./workshop install` sets up the Pi (packages, I2C/SPI, control panel); also starts and stops the servers | Rarely |
 
 **Locally:** open the folder with any static server (e.g. VS Code Live Server, or `python3 -m http.server`).
 **p5.js Web Editor:** create a new sketch and upload the files. See the https note below before connecting hardware.
@@ -69,10 +70,19 @@ Hardware gives a number → we normalize it to **0..1** → we stretch it to a p
 For an installation, open the page with `?ws=ws://raspberrypi.local:8765` at the end of the address to connect automatically.
 
 ### Installing the Python packages
-The servers' packages are listed in `requirements.txt` and go into a virtual environment (a `.venv` folder next to the files).
+The packages go into a virtual environment (a `.venv` folder next to the files).
 Recent Raspberry Pi OS (Bookworm and later) refuses `pip install` outside one ("externally-managed-environment").
 
-**Once, in the `responsive-installations` folder:**
+**On the Pi, one command sets everything up**, in the `responsive-installations` folder, as your normal user (not with sudo):
+```bash
+./workshop install
+```
+It creates the `.venv`, installs `requirements.txt` and `requirements-pi.txt` (Blinka and the ADS1115 library), and the
+NeoPixel library for that Pi's model. It also turns on I2C and SPI, turns the sound off on a Pi 3/4 (the NeoPixels need it), and
+installs the control panel (see *Starting and stopping the servers*). It's safe to run again, e.g. after a `git pull`.
+If it changed I2C, SPI or the sound, it ends by asking you to reboot once.
+
+**On a laptop** (for `test_server.py`), once, in the `responsive-installations` folder:
 ```bash
 python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
@@ -114,12 +124,12 @@ every reading, 30 a second; `SHOW_MESSAGES = False` prints none.
 Want fake readings instead? **Stop** the bridge first, then run `python test_server.py` yourself.
 Both use port 8765, and only one can use it at a time ("address already in use" means the other is still running).
 
-**Setting up the control panel (once per Pi, after *Installing the Python packages*):**
+**Setting up the control panel** is part of `./workshop install` (see *Installing the Python packages*):
 ```bash
 cd responsive-installations
 ./workshop install
 ```
-It finds the `.venv`, starts both servers, and starts them again every time the Pi powers on.
+It starts both servers, and starts them again every time the Pi powers on.
 
 **From a terminal or over SSH,** the same controls:
 ```bash
@@ -165,15 +175,16 @@ The pins are planned so every part can be connected at the same time:
 |---|---|---|
 | Push button | GPIO17 (pin 11) + GND, internal pull-up | none |
 | Toggle switch | GPIO27 (pin 13) + GND, internal pull-up | none |
-| Ultrasonic HC-SR04 | TRIG → GPIO24 (pin 18), ECHO → **1 kΩ/2 kΩ divider** → GPIO25 (pin 22) | 5 V |
+| Ultrasonic HC-SR04 | TRIG → GPIO23 (pin 16), ECHO → **1 kΩ/2 kΩ divider** → GPIO24 (pin 18) | 5 V |
 | PIR HC-SR501 | OUT → GPIO22 (pin 15) | 5 V |
-| Touch TTP223 | SIG → GPIO23 (pin 16) | 3.3 V |
+| Touch TTP223 | SIG → GPIO25 (pin 22) | 3.3 V |
 | LDR (light sensor) | **ADS1115** breakout A0 (I2C: SDA → pin 3, SCL → pin 5); LDR from 3.3 V to A0, 10 kΩ from A0 to GND | 3.3 V |
 | Slide pot · rotary pot · mic · joystick X/Y | MCP3008 CH0 · CH1 · CH3 · CH4/CH5 | 3.3 V |
 
 The Pi has no analog inputs, so analog parts go through an ADC chip:
-- The **LDR** uses an **ADS1115** breakout on I2C. Turn I2C on with `sudo raspi-config` → Interface Options → I2C,
-  then `i2cdetect -y 1` should show `48`. In the venv: `pip install adafruit-blinka adafruit-circuitpython-ads1x15`.
+- The **LDR** uses an **ADS1115** breakout on I2C. `./workshop install` turns I2C on and installs its library
+  (by hand: `sudo raspi-config` → Interface Options → I2C, and `pip install adafruit-blinka adafruit-circuitpython-ads1x15`).
+  Then `i2cdetect -y 1` should show `48`.
   `pi_bridge.py` sends A0's voltage ÷ 3.3, so 0..1 (more light, higher).
 - The other analog parts go through an **MCP3008** ADC on SPI
   (CLK → pin 23, DOUT → pin 21, DIN → pin 19, CS → pin 24). Turn SPI on with `sudo raspi-config` → Interface Options → SPI.
@@ -191,7 +202,8 @@ Three NeoPixels can run from the Pi's 5 V pin; for more, give them their own 5 V
 The Pi's 3.3 V data signal usually works with a short chain; if the first pixel flickers or shows the wrong colour,
 add a 74AHCT125 level shifter on the data line. List what you've wired in `OUTPUTS` at the top of `pi_bridge.py`.
 
-The NeoPixels need their own library, and which one depends on the Pi. In the venv (see *Installing the Python packages*):
+The NeoPixels need their own library, and which one depends on the Pi. `./workshop install` picks the right one and installs it.
+By hand, in the venv:
 
 **Pi 5:**
 ```bash
@@ -203,7 +215,7 @@ pip install adafruit-blinka adafruit-blinka-raspberry-pi5-neopixel adafruit-circ
 pip install adafruit-blinka adafruit-circuitpython-neopixel
 ```
 On these Pis the NeoPixel library needs root, and it shares hardware with the headphone jack's sound:
-- Turn the sound off: add `dtparam=audio=off` to `/boot/firmware/config.txt`, then reboot.
+- Turn the sound off: `./workshop install` does it, or add `dtparam=audio=off` to `/boot/firmware/config.txt`. Then reboot.
 - Run the bridge with sudo. The control panel does this for you on a Pi 3/4. By hand: `sudo .venv/bin/python pi_bridge.py`.
 
 When the bridge starts, its window lists each output as `ready` or `skipped:` with the reason (a missing library, or no sudo).

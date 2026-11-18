@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
-# workshop: install and control the workshop control panel on the Pi.
+# workshop: set up the Pi, and install and control the workshop control panel.
 #
 # The control panel (control.py) runs the two workshop servers and shows a web
 # page at http://<pi-ip>:8080 with Start / Stop / Restart buttons and live output
 # for each one. This command does the same things from a terminal or over SSH.
 #
-# One-time setup (on the Pi, in the folder with pi_bridge.py and control.py):
+# Setup (on the Pi, in the folder with pi_bridge.py and control.py, as your
+# normal user, not with sudo). Safe to run again, e.g. after a git pull:
 #   chmod +x workshop && ./workshop install
+# It creates the .venv, installs the Python packages (requirements.txt,
+# requirements-pi.txt and the NeoPixel library for this Pi's model), turns on
+# I2C and SPI, turns the sound off on a Pi 3/4 (the NeoPixels need it), and
+# installs the control panel so it starts at boot.
 #
 # Then:
 #   workshop start   [bridge|http|all]     (default: all)
@@ -23,16 +28,85 @@ PANEL="http://localhost:$PANEL_PORT"
 
 ip_addr() { hostname -I | awk '{print $1}'; }
 
+is_pi5() { tr -d '\0' < /proc/device-tree/model 2>/dev/null | grep -q "Raspberry Pi 5"; }
+
+step() { echo; echo "== $*"; }
+
+# The Python packages: the shared ones, the Pi-only ones, and this model's NeoPixel library.
+install_packages() {
+  local dir="$1" py="$2"
+  step "Installing Python packages"
+  "$py" -m pip install -r "$dir/requirements.txt" -r "$dir/requirements-pi.txt"
+
+  if is_pi5; then
+    step "Installing the NeoPixel library for a Pi 5"
+    "$py" -m pip install adafruit-blinka-raspberry-pi5-neopixel adafruit-circuitpython-pixelbuf \
+      || echo "!! The NeoPixel library didn't install. The rest works; the pixels will be skipped."
+  else
+    step "Installing the NeoPixel library for a Pi 3/4"
+    "$py" -m pip install adafruit-circuitpython-neopixel \
+      || echo "!! The NeoPixel library didn't install (it builds from source: try  sudo apt install python3-dev  and run this again). The rest works; the pixels will be skipped."
+  fi
+}
+
+# I2C (the ADS1115) and SPI (the MCP3008), and on a Pi 3/4 the sound off (it shares hardware
+# with the NeoPixels). Sets NEEDS_REBOOT=1 when a change only works after a reboot.
+NEEDS_REBOOT=0
+setup_interfaces() {
+  step "Turning on I2C and SPI"
+  if ! command -v raspi-config >/dev/null; then
+    echo "raspi-config not found: turn on I2C and SPI yourself."
+    return
+  fi
+  if [[ "$(sudo raspi-config nonint get_i2c)" != 0 ]]; then
+    sudo raspi-config nonint do_i2c 0 && echo "I2C turned on." && NEEDS_REBOOT=1
+  else echo "I2C already on."; fi
+  if [[ "$(sudo raspi-config nonint get_spi)" != 0 ]]; then
+    sudo raspi-config nonint do_spi 0 && echo "SPI turned on." && NEEDS_REBOOT=1
+  else echo "SPI already on."; fi
+
+  if ! is_pi5; then
+    step "Turning the sound off (a Pi 3/4 needs it off for the NeoPixels)"
+    local cfg=/boot/firmware/config.txt
+    [[ -f "$cfg" ]] || cfg=/boot/config.txt
+    if grep -q "^dtparam=audio=off" "$cfg"; then
+      echo "Sound already off."
+    else
+      if grep -q "^dtparam=audio=on" "$cfg"; then
+        sudo sed -i 's/^dtparam=audio=on/dtparam=audio=off/' "$cfg"
+      else
+        echo "dtparam=audio=off" | sudo tee -a "$cfg" >/dev/null
+      fi
+      echo "Sound turned off in $cfg."
+      NEEDS_REBOOT=1
+    fi
+  fi
+}
+
 install() {
   local dir user py
   dir="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
   user="$(id -un)"
   [[ -f "$dir/control.py" ]] || { echo "control.py must be in the same folder as this script ($dir)."; exit 1; }
+  if [[ "$EUID" == 0 ]]; then
+    echo "Run this as your normal user, without sudo: ./workshop install (it asks for sudo when it needs it)."
+    exit 1
+  fi
 
-  # Use the project's virtual environment if there is one, so gpiozero etc. are found.
+  # The project's virtual environment: use the one that's there, or make .venv.
+  # --system-site-packages lets it use the gpiozero that comes with Raspberry Pi OS.
   if   [[ -x "$dir/.venv/bin/python" ]]; then py="$dir/.venv/bin/python"
   elif [[ -x "$dir/venv/bin/python"  ]]; then py="$dir/venv/bin/python"
-  else py="$(command -v python3)"; fi
+  else
+    step "Creating the virtual environment (.venv)"
+    python3 -m venv --system-site-packages "$dir/.venv"
+    py="$dir/.venv/bin/python"
+  fi
+
+  install_packages "$dir" "$py"
+  setup_interfaces
+
+  step "Installing the control panel"
 
   # Remove the separate services from the earlier version of this script, if present.
   for old in p5-bridge p5-http; do
@@ -62,11 +136,16 @@ WantedBy=multi-user.target
 EOF
 
   sudo systemctl daemon-reload
-  sudo systemctl enable --now p5-control
+  sudo systemctl enable p5-control
+  sudo systemctl restart p5-control      # restart, so the servers load any new packages
   sudo ln -sf "$dir/workshop" /usr/local/bin/workshop
   sleep 1
   echo
   echo "Done. Control panel: http://$(ip_addr):$PANEL_PORT  (starts automatically at boot)"
+  if [[ "$NEEDS_REBOOT" == 1 ]]; then
+    echo
+    echo "Reboot once so the I2C, SPI and sound changes take effect:  sudo reboot"
+  fi
 }
 
 uninstall() {
