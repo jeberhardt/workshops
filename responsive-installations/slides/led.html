@@ -12,7 +12,7 @@
 <h2 style="font-size:72px;font-weight:700;line-height:1.1;color:#15131F">Output 1 · NeoPixels</h2>
 <div style="display:flex;gap:64px;flex:1">
 <div style="width:520px;display:flex;flex-direction:column;gap:24px">
-<p style="font-size:32px;line-height:1.4;color:#15131F">Three NeoPixels on one data wire: 5V, ground, and DIN through a 330Ω resistor and a logic level converter to GPIO 10 (pin 19).</p>
+<p style="font-size:32px;line-height:1.4;color:#15131F">Three NeoPixels on one data wire: 5V, ground, and DIN through a 330Ω resistor to GPIO 10 (pin 19).</p>
 <p style="font-size:24px;line-height:1.4;color:#4A4658">Each pixel can be any colour. The SPI library drives them the same way on every Pi, without sudo.</p>
 <div style="flex:1;display:flex;flex-direction:column;justify-content:center;border:3px dashed #B8AF9E;border-radius:16px;padding:32px">
 <p style="font-size:24px;line-height:1.4;color:#4A4658;text-align:center">[Fritzing diagram: 3 NeoPixels + resistor on GPIO 10]</p>
@@ -27,7 +27,7 @@
 </div>
 </div>
 </div>
-<aside>The new handler listens for messages until the browser disconnects, then tidies up. Each message is JSON: a name and its values in one piece of text, the same format the Outputs step sends. [255, 120, 0] is red, green, blue, 0–255, like fill(). brightness=0.3 because full brightness is dazzling up close and draws more power. One pixel at a time works too: pixels[0] = (255, 0, 0). The pixels expect 5V data and the Pi sends 3.3V: the converter lifts it. A few pixels often work without it, but a long strip needs it, so build the habit now. The 330Ω resistor protects the first pixel’s data pin. Once it works, send the circle’s colour instead, or tie the colour to the proximity value.</aside>
+<aside>The new handler listens for messages until the browser disconnects, then tidies up. Each message is JSON: a name and its values in one piece of text, the same format the Outputs step sends. [255, 120, 0] is red, green, blue, 0–255, like fill(). brightness=0.3 because full brightness is dazzling up close and draws more power. One pixel at a time works too: pixels[0] = (255, 0, 0). The 330Ω resistor protects the first pixel’s data pin. Once it works, send the circle’s colour instead, or tie the colour to the proximity value.</aside>
 </section>
 <script src="slide.js"></script>
 </body>

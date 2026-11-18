@@ -199,17 +199,14 @@ The Outputs step drives two parts on the Pi. The Outputs card has a Wiring diagr
 | Part | Connects to | Power |
 |---|---|---|
 | Passive buzzer | GPIO13 (pin 33) → 1 kΩ → PN2222A base; emitter → GND; buzzer between 5 V and the collector, with a 1N4148 diode across it (stripe to 5 V) | 5 V (pin 4) |
-| Logic level converter (breakout) | LV → 3.3 V (pin 17), LV1 → GPIO10 (pin 19, SPI MOSI), HV → 5 V rail, GND → − rail | 3.3 V and 5 V |
-| 3 NeoPixels (WS2812B, chained) | DIN → 330 Ω → converter HV1 | 5 V (pin 2) + GND |
+| 3 NeoPixels (WS2812B, chained) | DIN → 330 Ω → GPIO10 (pin 19, SPI MOSI) | 5 V (pin 2) + GND |
 
 The buzzer draws more current than a GPIO pin should give, so the transistor switches it, and the diode soaks up the
 spike when it switches off. gpiozero's `TonalBuzzer` plays the notes; a buzzer is loudest around 2–2.7 kHz.
 
 Three NeoPixels can run from the Pi's 5 V pin; for more, give them their own 5 V supply (with its GND joined to the Pi's).
-The pixels expect 5 V data and the Pi sends 3.3 V, so a logic level converter lifts it. With a few pixels 3.3 V often works
-anyway, but with a long strip the converter is what keeps it reliable. The common bidirectional converter boards are slow for
-NeoPixel data: if the pixels flicker or show the wrong colours, try DIN straight from pin 19 (through the 330 Ω), or a
-74AHCT125 chip, which is made for this. List what you've wired in `OUTPUTS` at the top of `pi_bridge.py`.
+The Pi's 3.3 V data signal usually works with a short chain; if the first pixel flickers or shows the wrong colour,
+add a 74AHCT125 level shifter on the data line. List what you've wired in `OUTPUTS` at the top of `pi_bridge.py`.
 
 The NeoPixels are driven over SPI with `adafruit-circuitpython-neopixel-spi`, the same way on every Pi from the 3 to the 5,
 without sudo. `./workshop install` installs it, turns SPI on and, on a Pi 3/4, fixes the chip's clock so the SPI timing

@@ -51,8 +51,8 @@ and for the *Outputs* step (step 11 in the menu): a **buzzer** and **3 NeoPixels
 | 1 | Passive buzzer (small and round, plays tones; not an active buzzer, which only beeps) | Through the transistor below | 5 V |
 | 1 | PN2222A NPN transistor | Base → 1 kΩ → GPIO13 (pin 33), emitter → GND, collector → buzzer − | — |
 | 1 | 1N4148 diode | Across the buzzer, stripe to 5 V | — |
-| 3 | NeoPixels (WS2812B), chained: a 3-pixel stick or strip, or 3 breakout pixels | DIN → 330 Ω → converter HV1 | 5 V |
-| 1 | Logic level converter breakout (4-channel, pins LV/HV/GND, LV1–4/HV1–4) | LV → 3.3 V (pin 17), LV1 → GPIO10 (pin 19, SPI), HV → 5 V, GND | 3.3 V and 5 V |
+| 3 | NeoPixels (WS2812B), chained: a 3-pixel stick or strip, or 3 breakout pixels | DIN → 330 Ω → GPIO10 (pin 19, SPI) | 5 V |
+| 1 | 74AHCT125 level shifter (optional) | Between GPIO10 and DIN, if the pixels flicker | 5 V |
 
 ## Resistors
 | Qty | Value | Used for |

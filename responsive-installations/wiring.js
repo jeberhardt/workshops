@@ -200,31 +200,24 @@ const WIRING = {
   // --- Outputs (the Outputs step) ---
 
   // Three NeoPixel boards in a chain: the data goes in DIN and out DOUT to the next one.
-  // A logic level converter lifts the Pi's 3.3 V data to the 5 V the pixels expect.
   pixels: () => ({
-    plus: '5V', height: 196,
-    parts: [levelConverter(),
-            pixelBoard(190, '#ff4d4d'), pixelBoard(240, '#4dff88'), pixelBoard(290, '#4d8bff')],
+    plus: '5V', height: 158,
+    parts: [pixelBoard(118, '#ff4d4d'), pixelBoard(178, '#4dff88'), pixelBoard(238, '#4d8bff')],
     wires: [
-      { pi: 17, pts: fromPi(17, 74), color: WIRE.orange, text: 'converter LV (the 3.3 V side’s power)' },
-      { pi: 19, pts: fromPi(19, [185, 74], 66), color: WIRE.green, text: 'converter LV1 (the data, at 3.3 V)' },
-      { pts: up([155, 74], GND_Y), color: WIRE.gnd, text: 'Converter GND → − rail' },
-      { pts: [[165, 116], [165, 122], [117, 122], [117, PLUS_Y]], color: WIRE.power, text: 'Converter HV → + rail (the 5 V side’s power)' },
-      { pts: [[185, 116], [185, 140], [198, 140], [198, 144]], color: WIRE.green, text: 'Converter HV1 → 330 Ω resistor → first pixel DIN (the data, now 5 V)' },
-      { pts: up([208, 144], PLUS_Y), color: WIRE.power, text: 'Every pixel’s 5V → + rail (5 V)' },
-      { pts: up([258, 144], PLUS_Y), color: WIRE.power },
-      { pts: up([308, 144], PLUS_Y), color: WIRE.power },
-      { pts: up([218, 144], GND_Y), color: WIRE.gnd, text: 'Every pixel’s GND → − rail' },
-      { pts: up([268, 144], GND_Y), color: WIRE.gnd },
-      { pts: up([318, 144], GND_Y), color: WIRE.gnd },
-      { pts: [[228, 144], [228, 140], [248, 140], [248, 144]], color: WIRE.yellow, text: 'Pixel 1 DOUT → pixel 2 DIN' },
-      { pts: [[278, 144], [278, 140], [298, 140], [298, 144]], color: WIRE.yellow, text: 'Pixel 2 DOUT → pixel 3 DIN (pixel 3’s DOUT stays empty)' },
+      { pi: 19, pts: fromPi(19, [127, 106], 90), color: WIRE.green, text: '330 Ω resistor → first pixel DIN' },
+      { pts: up([139, 106], PLUS_Y), color: WIRE.power, text: 'Every pixel’s 5V → + rail (5 V)' },
+      { pts: up([199, 106], PLUS_Y), color: WIRE.power },
+      { pts: up([259, 106], PLUS_Y), color: WIRE.power },
+      { pts: up([151, 106], GND_Y), color: WIRE.gnd, text: 'Every pixel’s GND → − rail' },
+      { pts: up([211, 106], GND_Y), color: WIRE.gnd },
+      { pts: up([271, 106], GND_Y), color: WIRE.gnd },
+      { pts: [[163, 106], [163, 100], [187, 100], [187, 106]], color: WIRE.yellow, text: 'Pixel 1 DOUT → pixel 2 DIN' },
+      { pts: [[223, 106], [223, 100], [247, 100], [247, 106]], color: WIRE.yellow, text: 'Pixel 2 DOUT → pixel 3 DIN (pixel 3’s DOUT stays empty)' },
     ],
-    extras: [resistor(185, 119, 185, 137, '330Ω')],
+    extras: [resistor(pinX(19) + 7, 58, pinX(19) + 7, 84, '330Ω')],   // + 7: on the wire, which steps between the pins
     notes: [
-      'The pixels run on 5 V and expect 5 V data, but the Pi’s pins give 3.3 V. The converter’s LV side connects to the Pi (3.3 V from pin 17, data from pin 19), its HV side to 5 V and the pixels. Its two GND pins are joined inside, so one GND wire does both. With a few pixels 3.3 V often works anyway; with a long strip, the converter is what keeps it reliable.',
-      'The data goes one way: into DIN, out of DOUT, into the next pixel’s DIN. Pin order differs between boards: follow the labels printed on yours. Pin 19 is the SPI data pin, so SPI must be on (./workshop install turns it on).',
-      'These converter boards are slow for NeoPixel data. If the pixels flicker or show the wrong colours, try DIN straight from pin 19 (through the 330 Ω), or a 74AHCT125 chip, which is made for this.',
+      'The data goes one way: into DIN, out of DOUT, into the next pixel’s DIN. Many boards have an arrow showing the way. Pin order differs between boards: follow the labels printed on yours.',
+      'Pin 19 is the SPI data pin, so SPI must be on (./workshop install turns it on). Three pixels can run from the Pi’s 5 V; if the first one flickers, add a 74AHCT125 level shifter on the data line.',
     ],
   }),
 
@@ -390,20 +383,8 @@ function ldr(x1, x2) {
 
 // One NeoPixel breakout board: four legs (DIN, 5V, GND, DOUT) and its LED.
 function pixelBoard(x, glow) {
-  return part(x, 150, 46, 34, '#1a1a1a', [['DIN', x + 8], ['5V', x + 18], ['GND', x + 28], ['DOUT', x + 38]],
-    `<rect x="${x + 16}" y="168" width="14" height="14" rx="1.5" fill="#f4f4f0"/>` + svgCircle(x + 23, 175, 4, glow));
-}
-
-// The logic level converter breakout: the low-voltage (3.3 V) pins face the Pi,
-// the high-voltage (5 V) pins face the pixels. LV1 ↔ HV1 is one channel, and so on.
-function levelConverter() {
-  const lv = [['LV4', 135], ['LV3', 145], ['GND', 155], ['LV', 165], ['LV2', 175], ['LV1', 185]];
-  let s = part(127, 80, 66, 30, '#c62828', lv);
-  for (const [name, px] of lv) {
-    const hv = name === 'GND' ? 'GND' : name.replace('LV', 'HV');
-    s += leg(px, 109, 116) + label(px + 1.8, 107, hv, '#fff', 5, 'end');
-  }
-  return s;
+  return part(x, 112, 54, 34, '#1a1a1a', [['DIN', x + 9], ['5V', x + 21], ['GND', x + 33], ['DOUT', x + 45]],
+    `<rect x="${x + 20}" y="130" width="14" height="14" rx="1.5" fill="#f4f4f0"/>` + svgCircle(x + 27, 137, 4, glow));
 }
 
 // The PN2222A transistor (TO-92), flat side facing you: legs E, B, C.
