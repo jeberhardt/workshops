@@ -19,6 +19,8 @@ Every input can be connected to any property of the circle or its animation.
 | `pi_bridge.py` | The real Pi bridge: reads the wired parts with gpiozero, sends them to the sketch | List your wired parts in `WIRED` |
 | `test_server.py` | Fake "Raspberry Pi" for testing without hardware | Rarely |
 | `requirements.txt` | Python packages the servers need | Add packages here |
+| `control.py` | Control panel on the Pi (port 8080): start, stop and watch each server from a browser | Rarely |
+| `workshop` | Installs the control panel; also starts and stops the servers from a terminal | Rarely |
 
 **Locally:** open the folder with any static server (e.g. VS Code Live Server, or `python3 -m http.server`).
 **p5.js Web Editor:** create a new sketch and upload the files. See the https note below before connecting hardware.
@@ -47,8 +49,8 @@ without dropdowns) and real hardware with `setupHardware()`.
 Hardware gives a number → we normalize it to **0..1** → we stretch it to a property's **min..max** → we smooth it.
 
 ## Connecting real hardware
-1. Run a WebSocket server that sends sensor readings: `python pi_bridge.py` on the Pi, or `python test_server.py` for fake readings without hardware
-   (inside the venv: see *Installing the Python packages* below). Only wired some parts? Comment out the others in `WIRED` at the top of `pi_bridge.py`,
+1. Run a WebSocket server that sends sensor readings: `pi_bridge.py` on the Pi (already running if the control panel is set up: see *Starting and stopping the servers* below),
+   or `python test_server.py` for fake readings without hardware (inside the venv: see *Installing the Python packages* below). Only wired some parts? Comment out the others in `WIRED` at the top of `pi_bridge.py`,
    so their cards keep simulating instead of reading noise from empty pins.
 2. Type its address in the panel (e.g. `ws://raspberrypi.local:8765`) and press **Connect**.
 3. Each input that receives a reading turns **LIVE** (green) and stops simulating. Inputs with no hardware keep simulating.
@@ -76,6 +78,41 @@ python pi_bridge.py            # on the Pi; or python test_server.py for fake re
 `--system-site-packages` lets the venv use the `gpiozero` that comes with Raspberry Pi OS, already set up for the Pi's pins
 (and the libraries it needs for the pins and SPI). That's why `gpiozero` isn't in `requirements.txt`.
 The same commands work on a laptop for `test_server.py`.
+
+### Starting and stopping the servers
+The Pi runs both servers for you, so you don't need a keyboard, a screen or a terminal on it:
+
+- **WebSocket bridge** (`pi_bridge.py`, port 8765): sends the sensor readings to the sketch.
+- **HTTP server** (port 8000): serves this page, at `http://raspberrypi.local:8000/?step=3`.
+
+To start or stop them, open the **control panel** in your browser: `http://raspberrypi.local:8080` (or use the Pi's IP address).
+Each server has **Start**, **Stop** and **Restart** buttons, and a window showing everything it prints, including errors.
+**Clear** only empties the window; the server keeps running.
+
+- A green **running** label means it's working.
+- **Stopped** means someone pressed **Stop**.
+- A red **crashed** label means it stopped on its own. Read the last lines of its window to see why.
+
+Stop sends Ctrl+C, just like stopping it in a terminal, so `pi_bridge.py` releases the pins properly.
+After editing `pi_bridge.py`, press **Restart** to load your changes.
+
+Want fake readings instead? **Stop** the bridge first, then run `python test_server.py` yourself.
+Both use port 8765, and only one can use it at a time ("address already in use" means the other is still running).
+
+**Setting up the control panel (once per Pi, after *Installing the Python packages*):**
+```bash
+cd responsive-installations
+./workshop install
+```
+It finds the `.venv`, starts both servers, and starts them again every time the Pi powers on.
+
+**From a terminal or over SSH,** the same controls:
+```bash
+workshop status              # what's running, and the addresses to open
+workshop stop bridge         # start / stop / restart; bridge, http or all
+workshop logs bridge         # watch a server's output (Ctrl+C to exit)
+```
+The control panel has no password, so anyone on the same Wi-Fi can use it. Fine for a workshop room; think twice on a public network.
 
 ### Message format
 JSON, as one object, several at once, or a list:

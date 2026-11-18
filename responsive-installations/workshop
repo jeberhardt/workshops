@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+# workshop: install and control the workshop control panel on the Pi.
+#
+# The control panel (control.py) runs the two workshop servers and shows a web
+# page at http://<pi-ip>:8080 with Start / Stop / Restart buttons and live output
+# for each one. This command does the same things from a terminal or over SSH.
+#
+# One-time setup (on the Pi, in the folder with pi_bridge.py and control.py):
+#   chmod +x workshop && ./workshop install
+#
+# Then:
+#   workshop start   [bridge|http|all]     (default: all)
+#   workshop stop    [bridge|http|all]
+#   workshop restart [bridge|http|all]
+#   workshop status
+#   workshop logs    bridge|http           (follow live output, Ctrl+C to exit)
+#   workshop uninstall
+
+set -euo pipefail
+
+PANEL_PORT=8080
+PANEL="http://localhost:$PANEL_PORT"
+
+ip_addr() { hostname -I | awk '{print $1}'; }
+
+install() {
+  local dir user py
+  dir="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+  user="$(id -un)"
+  [[ -f "$dir/control.py" ]] || { echo "control.py must be in the same folder as this script ($dir)."; exit 1; }
+
+  # Use the project's virtual environment if there is one, so gpiozero etc. are found.
+  if   [[ -x "$dir/.venv/bin/python" ]]; then py="$dir/.venv/bin/python"
+  elif [[ -x "$dir/venv/bin/python"  ]]; then py="$dir/venv/bin/python"
+  else py="$(command -v python3)"; fi
+
+  # Remove the separate services from the earlier version of this script, if present.
+  for old in p5-bridge p5-http; do
+    if [[ -f "/etc/systemd/system/$old.service" ]]; then
+      sudo systemctl disable --now "$old" 2>/dev/null || true
+      sudo rm -f "/etc/systemd/system/$old.service"
+    fi
+  done
+
+  echo "Installing control panel for user '$user', folder $dir, python $py"
+  sudo tee /etc/systemd/system/p5-control.service >/dev/null <<EOF
+[Unit]
+Description=Workshop control panel (port $PANEL_PORT)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=$user
+WorkingDirectory=$dir
+ExecStart=$py -u $dir/control.py
+Restart=on-failure
+RestartSec=2
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now p5-control
+  sudo ln -sf "$dir/workshop" /usr/local/bin/workshop
+  sleep 1
+  echo
+  echo "Done. Control panel: http://$(ip_addr):$PANEL_PORT  (starts automatically at boot)"
+}
+
+uninstall() {
+  sudo systemctl disable --now p5-control 2>/dev/null || true
+  sudo rm -f /etc/systemd/system/p5-control.service /usr/local/bin/workshop
+  sudo systemctl daemon-reload
+  echo "Control panel removed."
+}
+
+need_panel() {
+  curl -fsS "$PANEL/api/status" >/dev/null 2>&1 || {
+    echo "The control panel isn't running. Start it with: sudo systemctl start p5-control"
+    exit 1
+  }
+}
+
+target() {
+  case "${1:-all}" in
+    bridge|http|all) echo "${1:-all}" ;;
+    *) echo "Unknown server '$1'. Use bridge, http or all." >&2; exit 1 ;;
+  esac
+}
+
+status() {
+  need_panel
+  curl -fsS "$PANEL/api/status" | python3 -c '
+import json, sys
+for name, s in json.load(sys.stdin).items():
+    if s["running"]:
+        state = "running (pid %s)" % s["pid"]
+    elif s.get("crashed"):
+        state = "CRASHED (exit %s), see: workshop logs %s" % (s["exit_code"], name)
+    else:
+        state = "stopped"
+    print("%-7s %-20s port %-5s %s" % (name, s["label"], s["port"], state))'
+  local ip; ip="$(ip_addr)"
+  echo
+  echo "Control panel: http://$ip:$PANEL_PORT"
+  echo "Sketch page:   http://$ip:8000"
+  echo "WebSocket:     ws://$ip:8765"
+}
+
+logs() {
+  need_panel
+  local name="${1:-}"
+  [[ "$name" == bridge || "$name" == http ]] || { echo "Usage: workshop logs bridge|http"; exit 1; }
+  python3 - "$PANEL" "$name" <<'PY'
+import json, sys, time, urllib.request
+panel, name = sys.argv[1], sys.argv[2]
+seq = 0
+try:
+    while True:
+        with urllib.request.urlopen(f"{panel}/api/logs/{name}?since={seq}") as r:
+            data = json.load(r)
+        if data["seq"] < seq:
+            seq = 0
+            continue
+        for _, t, text in data["lines"]:
+            print(f"{t}  {text}", flush=True)
+        seq = data["seq"]
+        time.sleep(0.5)
+except KeyboardInterrupt:
+    pass
+PY
+}
+
+act() {
+  need_panel
+  local t; t="$(target "${2:-all}")"
+  curl -fsS -X POST "$PANEL/api/$t/$1" >/dev/null
+  status
+}
+
+case "${1:-status}" in
+  install)   install ;;
+  uninstall) uninstall ;;
+  start|stop|restart) act "$1" "${2:-all}" ;;
+  status)    status ;;
+  logs)      logs "${2:-}" ;;
+  *) echo "Usage: workshop {start|stop|restart} [bridge|http|all] | status | logs bridge|http | install | uninstall"; exit 1 ;;
+esac
