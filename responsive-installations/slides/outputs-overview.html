@@ -24,7 +24,7 @@
       <p style="font-family:'Space Grotesk', Arial, sans-serif; font-size:28px; line-height:1.4; color:#4a4658">A tiny speaker that plays tones. The sketch picks the pitch and when it sounds.</p>
     </div>
   </div>
-  <aside>Inputs let the audience talk to the sketch; outputs let the piece answer in the room, not just on screen. The LEDs are three WS2812 NeoPixels chained together: 5V, ground, and one data line through a 330Ω resistor to GPIO 10 (SPI MOSI), driven by the adafruit-circuitpython-neopixel-spi library, which works on every Pi from the 3 to the 5 without sudo. The buzzer is a small passive buzzer driven through a PN2222A transistor from GPIO 13, with a flyback diode across it, because it draws more current than a GPIO pin should supply. gpiozero's TonalBuzzer plays notes; it's loudest around 2 to 2.7 kHz.</aside>
+  <aside>Inputs let the audience talk to the sketch; outputs let the piece answer in the room, not just on screen. The LEDs are three WS2812 NeoPixels chained together: 5V, ground, and one data line through a 330Ω resistor and a logic level converter (3.3V to 5V) to GPIO 10 (SPI MOSI), driven by the adafruit-circuitpython-neopixel-spi library, which works on every Pi from the 3 to the 5 without sudo. The buzzer is a small passive buzzer driven through a PN2222A transistor from GPIO 13, with a flyback diode across it, because it draws more current than a GPIO pin should supply. gpiozero's TonalBuzzer plays notes; it's loudest around 2 to 2.7 kHz.</aside>
 </section>
 <script src="slide.js"></script>
 </body>

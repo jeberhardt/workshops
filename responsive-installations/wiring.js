@@ -68,10 +68,10 @@ const WIRING = {
 
   button: () => ({
     plus: null, height: 146,
-    parts: [part(110, 102, 32, 32, '#222', [['', 116], ['', 136]], svgCircle(126, 118, 9, '#555'))],
+    parts: [part(117, 102, 32, 32, '#222', [['', 123], ['', 143]], svgCircle(133, 118, 9, '#555'))],
     wires: [
-      { pi: 11, pts: fromPi(11, [116, 96]), color: WIRE.yellow, text: 'one button leg' },
-      { pts: up([136, 96], GND_Y), color: WIRE.gnd, text: 'Other button leg → − rail' },
+      { pi: 11, pts: fromPi(11, 96), color: WIRE.yellow, text: 'one button leg' },
+      { pts: up([143, 96], GND_Y), color: WIRE.gnd, text: 'Other button leg → − rail' },
     ],
     notes: [
       'No resistor needed: the Pi\'s internal pull-up holds the pin HIGH, and pressing connects it to GND (LOW).',
@@ -81,10 +81,10 @@ const WIRING = {
 
   switch: () => ({
     plus: null, height: 140,
-    parts: [part(98, 102, 64, 26, '#b8bcc2', [['1', 110], ['COM', 130], ['2', 150]], svgCircle(130, 120, 5, '#666'), '#333')],
+    parts: [part(105, 102, 64, 26, '#b8bcc2', [['1', 117], ['COM', 137], ['2', 157]], svgCircle(147, 123, 4, '#666'), '#333')],
     wires: [
-      { pi: 13, pts: fromPi(13, [130, 96]), color: WIRE.green, text: 'middle pin (COM)' },
-      { pts: up([110, 96], GND_Y), color: WIRE.gnd, text: 'One outer pin → − rail (the other stays empty)' },
+      { pi: 13, pts: fromPi(13, 96), color: WIRE.green, text: 'middle pin (COM)' },
+      { pts: up([117, 96], GND_Y), color: WIRE.gnd, text: 'One outer pin → − rail (the other stays empty)' },
     ],
     notes: [
       'Same trick as the button: internal pull-up, so the pin reads LOW when the switch points at the GND side.',
@@ -95,17 +95,17 @@ const WIRING = {
   proximity: () => ({
     plus: '5V', height: 178,
     parts: [part(96, 126, 108, 44, '#1c4f9c',
-      [['VCC', 129], ['TRIG', 143], ['ECHO', 157], ['GND', 171]],
+      [['VCC', 129], ['TRIG', 144], ['ECHO', 157], ['GND', 171]],
       transducer(116, 152) + transducer(184, 152))],
     wires: [
       { pts: up([129, 120], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (5 V)' },
-      { pi: 16, pts: fromPi(16, [143, 120], 72), color: WIRE.green, text: 'TRIG' },
+      { pi: 16, pts: fromPi(16, 120), color: WIRE.green, text: 'TRIG' },
       { pts: [[157, 120], [157, 104], [193, 104]], color: WIRE.orange, text: 'ECHO → 1 kΩ resistor → junction' },
-      { pi: 18, pts: fromPi(18, [193, 104], 90), color: WIRE.purple, text: 'the junction between the resistors (ECHO)' },
+      { pi: 18, pts: fromPi(18, [193, 104], 80), color: WIRE.purple, text: 'the junction between the resistors (ECHO)' },
       { pts: [[193, 104], [250, 104], [250, GND_Y]], color: WIRE.gnd, text: 'Junction → 2 kΩ resistor → − rail' },
       { pts: [[171, 120], [171, 114], [262, 114], [262, GND_Y]], color: WIRE.gnd, text: 'GND → − rail' },
     ],
-    extras: [resistor(157, 104, 193, 104, '1kΩ'), resistor(193, 104, 250, 104, '2kΩ'), junction(193, 104)],
+    extras: [resistor(157, 104, 193, 104, '1kΩ', true), resistor(193, 104, 250, 104, '2kΩ', true), junction(193, 104)],
     notes: [
       'The HC-SR04 needs 5 V, and its ECHO pin answers with 5 V: too much for a GPIO pin. The 1 kΩ + 2 kΩ divider brings it down to 3.3 V. Never wire ECHO straight to the Pi.',
       'No 2 kΩ? Use two 1 kΩ in a row, or 2.2 kΩ. gpiozero DistanceSensor(echo=24, trigger=23): send distance × 100 (cm).',
@@ -114,12 +114,12 @@ const WIRING = {
 
   pir: () => ({
     plus: '5V', height: 152,
-    parts: [part(104, 102, 80, 40, '#2e7d32', [['VCC', 124], ['OUT', 144], ['GND', 164]],
-      svgCircle(144, 129, 11, '#f5f5f0', '#ccc'))],
+    parts: [part(111, 102, 80, 40, '#2e7d32', [['VCC', 131], ['OUT', 151], ['GND', 171]],
+      svgCircle(151, 129, 11, '#f5f5f0', '#ccc'))],
     wires: [
-      { pts: up([124, 96], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (5 V)' },
-      { pi: 15, pts: fromPi(15, [144, 96]), color: WIRE.orange, text: 'OUT' },
-      { pts: up([164, 96], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
+      { pts: up([131, 96], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (5 V)' },
+      { pi: 15, pts: fromPi(15, 96), color: WIRE.orange, text: 'OUT' },
+      { pts: up([171, 96], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
     ],
     notes: [
       'An HC-SR501 runs on 5 V but its OUT pin gives 3.3 V, so it can go straight to the Pi.',
@@ -129,12 +129,12 @@ const WIRING = {
 
   touch: () => ({
     plus: '3.3V', height: 146,
-    parts: [part(161, 102, 64, 34, '#c62828', [['VCC', 175], ['SIG', 193], ['GND', 211]],
-      svgCircle(193, 124, 8, '#e8a0a0', '#fff'))],
+    parts: [part(154, 102, 64, 34, '#c62828', [['VCC', 168], ['SIG', 186], ['GND', 204]],
+      svgCircle(195, 127, 8, '#e8a0a0', '#fff'))],
     wires: [
-      { pts: up([175, 96], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (3.3 V)' },
-      { pi: 22, pts: fromPi(22, [193, 96]), color: WIRE.blue, text: 'SIG (also marked I/O or OUT)' },
-      { pts: up([211, 96], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
+      { pts: up([168, 96], PLUS_Y), color: WIRE.power, text: 'VCC → + rail (3.3 V)' },
+      { pi: 22, pts: fromPi(22, 96), color: WIRE.blue, text: 'SIG (also marked I/O or OUT)' },
+      { pts: up([204, 96], GND_Y), color: WIRE.gnd, text: 'GND → − rail' },
     ],
     notes: [
       'A TTP223 touch module: SIG goes HIGH while touched. Power it from 3.3 V so its output is safe for the Pi.',
@@ -200,24 +200,31 @@ const WIRING = {
   // --- Outputs (the Outputs step) ---
 
   // Three NeoPixel boards in a chain: the data goes in DIN and out DOUT to the next one.
+  // A logic level converter lifts the Pi's 3.3 V data to the 5 V the pixels expect.
   pixels: () => ({
-    plus: '5V', height: 158,
-    parts: [pixelBoard(118, '#ff4d4d'), pixelBoard(178, '#4dff88'), pixelBoard(238, '#4d8bff')],
+    plus: '5V', height: 196,
+    parts: [levelConverter(),
+            pixelBoard(190, '#ff4d4d'), pixelBoard(240, '#4dff88'), pixelBoard(290, '#4d8bff')],
     wires: [
-      { pi: 19, pts: fromPi(19, [127, 106], 90), color: WIRE.green, text: '330 Ω resistor → first pixel DIN' },
-      { pts: up([139, 106], PLUS_Y), color: WIRE.power, text: 'Every pixel’s 5V → + rail (5 V)' },
-      { pts: up([199, 106], PLUS_Y), color: WIRE.power },
-      { pts: up([259, 106], PLUS_Y), color: WIRE.power },
-      { pts: up([151, 106], GND_Y), color: WIRE.gnd, text: 'Every pixel’s GND → − rail' },
-      { pts: up([211, 106], GND_Y), color: WIRE.gnd },
-      { pts: up([271, 106], GND_Y), color: WIRE.gnd },
-      { pts: [[163, 106], [163, 100], [187, 100], [187, 106]], color: WIRE.yellow, text: 'Pixel 1 DOUT → pixel 2 DIN' },
-      { pts: [[223, 106], [223, 100], [247, 100], [247, 106]], color: WIRE.yellow, text: 'Pixel 2 DOUT → pixel 3 DIN (pixel 3’s DOUT stays empty)' },
+      { pi: 17, pts: fromPi(17, 74), color: WIRE.orange, text: 'converter LV (the 3.3 V side’s power)' },
+      { pi: 19, pts: fromPi(19, [185, 74], 66), color: WIRE.green, text: 'converter LV1 (the data, at 3.3 V)' },
+      { pts: up([155, 74], GND_Y), color: WIRE.gnd, text: 'Converter GND → − rail' },
+      { pts: [[165, 116], [165, 122], [117, 122], [117, PLUS_Y]], color: WIRE.power, text: 'Converter HV → + rail (the 5 V side’s power)' },
+      { pts: [[185, 116], [185, 140], [198, 140], [198, 144]], color: WIRE.green, text: 'Converter HV1 → 330 Ω resistor → first pixel DIN (the data, now 5 V)' },
+      { pts: up([208, 144], PLUS_Y), color: WIRE.power, text: 'Every pixel’s 5V → + rail (5 V)' },
+      { pts: up([258, 144], PLUS_Y), color: WIRE.power },
+      { pts: up([308, 144], PLUS_Y), color: WIRE.power },
+      { pts: up([218, 144], GND_Y), color: WIRE.gnd, text: 'Every pixel’s GND → − rail' },
+      { pts: up([268, 144], GND_Y), color: WIRE.gnd },
+      { pts: up([318, 144], GND_Y), color: WIRE.gnd },
+      { pts: [[228, 144], [228, 140], [248, 140], [248, 144]], color: WIRE.yellow, text: 'Pixel 1 DOUT → pixel 2 DIN' },
+      { pts: [[278, 144], [278, 140], [298, 140], [298, 144]], color: WIRE.yellow, text: 'Pixel 2 DOUT → pixel 3 DIN (pixel 3’s DOUT stays empty)' },
     ],
-    extras: [resistor(pinX(19) + 7, 58, pinX(19) + 7, 84, '330Ω')],   // + 7: on the wire, which steps between the pins
+    extras: [resistor(185, 119, 185, 137, '330Ω')],
     notes: [
-      'The data goes one way: into DIN, out of DOUT, into the next pixel’s DIN. Many boards have an arrow showing the way. Pin order differs between boards: follow the labels printed on yours.',
-      'Pin 19 is the SPI data pin, so SPI must be on (./workshop install turns it on). Three pixels can run from the Pi’s 5 V; if the first one flickers, add a 74AHCT125 level shifter on the data line.',
+      'The pixels run on 5 V and expect 5 V data, but the Pi’s pins give 3.3 V. The converter’s LV side connects to the Pi (3.3 V from pin 17, data from pin 19), its HV side to 5 V and the pixels. Its two GND pins are joined inside, so one GND wire does both. With a few pixels 3.3 V often works anyway; with a long strip, the converter is what keeps it reliable.',
+      'The data goes one way: into DIN, out of DOUT, into the next pixel’s DIN. Pin order differs between boards: follow the labels printed on yours. Pin 19 is the SPI data pin, so SPI must be on (./workshop install turns it on).',
+      'These converter boards are slow for NeoPixel data. If the pixels flicker or show the wrong colours, try DIN straight from pin 19 (through the 330 Ω), or a 74AHCT125 chip, which is made for this.',
     ],
   }),
 
@@ -269,10 +276,11 @@ const chX = i => 145 + i * 10;   // x of the chip's i-th pin, either row
 
 function chipWires() {
   return [
-    { pi: 23, pts: fromPi(23, [chX(3), 82], 66), color: WIRE.yellow, text: 'MCP3008 CLK (13)' },
+    // Each wire turns at its own distance from the header, so no two run on top of each other.
+    { pi: 23, pts: fromPi(23, [chX(3), 82], 64), color: WIRE.yellow, text: 'MCP3008 CLK (13)' },
     { pi: 21, pts: fromPi(21, [chX(4), 82], 70), color: WIRE.green,  text: 'MCP3008 DOUT (12)' },
-    { pi: 19, pts: fromPi(19, [chX(5), 82], 74), color: WIRE.blue,   text: 'MCP3008 DIN (11)' },
-    { pi: 24, pts: fromPi(24, [chX(6), 82], 62), color: WIRE.orange, text: 'MCP3008 CS (10)' },
+    { pi: 19, pts: fromPi(19, [chX(5), 82], 76), color: WIRE.blue,   text: 'MCP3008 DIN (11)' },
+    { pi: 24, pts: fromPi(24, [chX(6), 82], 60), color: WIRE.orange, text: 'MCP3008 CS (10)' },
     { pts: up([chX(0), 82], PLUS_Y), color: WIRE.power, text: 'VDD (16) and VREF (15) → + rail (3.3 V)' },
     { pts: up([chX(1), 82], PLUS_Y), color: WIRE.power },
     { pts: up([chX(2), 82], GND_Y), color: WIRE.gnd, text: 'AGND (14) and DGND (9) → − rail' },
@@ -298,7 +306,7 @@ function mcp3008() {
 function ads1115() {
   const names = ['VDD', 'GND', 'SCL', 'SDA', 'ADDR', 'ALRT', 'A0', 'A1', 'A2', 'A3'];
   return part(128, 100, 150, 40, '#1f4fa0', names.map((n, i) => [n, 138 + i * 14]),
-    label(205, 119, 'ADS1115', '#fff', 5.5));
+    label(205, 120, 'ADS1115', '#fff', 5));
 }
 
 
@@ -382,8 +390,20 @@ function ldr(x1, x2) {
 
 // One NeoPixel breakout board: four legs (DIN, 5V, GND, DOUT) and its LED.
 function pixelBoard(x, glow) {
-  return part(x, 112, 54, 34, '#1a1a1a', [['DIN', x + 9], ['5V', x + 21], ['GND', x + 33], ['DOUT', x + 45]],
-    `<rect x="${x + 20}" y="130" width="14" height="14" rx="1.5" fill="#f4f4f0"/>` + svgCircle(x + 27, 137, 4, glow));
+  return part(x, 150, 46, 34, '#1a1a1a', [['DIN', x + 8], ['5V', x + 18], ['GND', x + 28], ['DOUT', x + 38]],
+    `<rect x="${x + 16}" y="168" width="14" height="14" rx="1.5" fill="#f4f4f0"/>` + svgCircle(x + 23, 175, 4, glow));
+}
+
+// The logic level converter breakout: the low-voltage (3.3 V) pins face the Pi,
+// the high-voltage (5 V) pins face the pixels. LV1 ↔ HV1 is one channel, and so on.
+function levelConverter() {
+  const lv = [['LV4', 135], ['LV3', 145], ['GND', 155], ['LV', 165], ['LV2', 175], ['LV1', 185]];
+  let s = part(127, 80, 66, 30, '#c62828', lv);
+  for (const [name, px] of lv) {
+    const hv = name === 'GND' ? 'GND' : name.replace('LV', 'HV');
+    s += leg(px, 109, 116) + label(px + 1.8, 107, hv, '#fff', 5, 'end');
+  }
+  return s;
 }
 
 // The PN2222A transistor (TO-92), flat side facing you: legs E, B, C.
@@ -401,8 +421,9 @@ function diode(x1, x2, y) {
     + label(cx + 2, y - 6, '1N4148', '#333', 5.5, 'end');
 }
 
-// A resistor sitting on a straight wire segment, with its value written beside it.
-function resistor(x1, y1, x2, y2, value) {
+// A resistor sitting on a straight wire segment, with its value written beside it
+// (textLeft: on its left, for one that stands upright in the picture).
+function resistor(x1, y1, x2, y2, value, textLeft = false) {
   const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
   const across = y1 === y2;   // horizontal
   const bands = BANDS[value].map((c, i) => {
@@ -415,7 +436,7 @@ function resistor(x1, y1, x2, y2, value) {
     ? `<rect x="${cx - 9}" y="${cy - 3}" width="18" height="6" rx="2" fill="#d9b38c" stroke="#a07e58" stroke-width=".6"/>`
     : `<rect x="${cx - 3}" y="${cy - 9}" width="6" height="18" rx="2" fill="#d9b38c" stroke="#a07e58" stroke-width=".6"/>`;
   const text = across
-    ? label(cx + 2, cy + 6, value, '#333')
+    ? label(cx + 2, cy + (textLeft ? -6 : 6), value, '#333', 6, textLeft ? 'end' : 'start')
     : label(cx - 6, cy, value, '#333', 6, 'middle');
   return body + bands + text;
 }
