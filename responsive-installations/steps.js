@@ -65,9 +65,9 @@ const STEPS = [
     globals: ['SMOOTHING', 'r', 'g', 'b', 'a', 'size', 'x', 'bright'],
     functions: ['setup', 'draw', 'windowResized'] },
   { file: 'steps/step12.js', title: 'Outputs',
-    about: 'The sketch talks back. Wire a buzzer and 3 NeoPixels (open "Wiring" on the Outputs card). Hold the Buzzer button on the screen to sound the buzzer; the card\'s buttons light the pixels.',
-    globals: ['buzzing'],
-    functions: ['setup', 'buildOutputButtons', 'lightsOn', 'lightsOff', 'buttonSize', 'overButton', 'pressCanvas', 'mouseReleased', 'draw', 'windowResized'] },
+    about: 'The sketch talks back. Wire a buzzer and 3 NeoPixels (open "Wiring" on the Outputs card). Hold the Buzzer button on the screen to sound the buzzer; the card\'s buttons light the pixels, or blink them in 3 colours.',
+    globals: ['buzzing', 'BLINK_MS', 'COLOURS', 'blinking', 'lit', 'lastBlink'],
+    functions: ['setup', 'buildOutputButtons', 'lightsOn', 'lightsOff', 'startBlinking', 'blink', 'buttonSize', 'overButton', 'pressCanvas', 'mouseReleased', 'draw', 'windowResized'] },
 ].filter(s => !s.hidden);
 
 // The slides, in deck order: slides/<id>.html. Their number is their place in this list.

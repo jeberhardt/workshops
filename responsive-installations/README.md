@@ -50,7 +50,7 @@ On steps with input cards (9–11), the Code view has a second, read-only tab, *
 10. **Any input → any property** — every property in `PROPS`; the dropdowns choose the mapping.
     *Hidden for now (`hidden: true` in `steps.js`), so the menu shows Real hardware as step 10.*
 11. **Real hardware** — step 9 plus `setupHardware()`: the same three parts doing the same things, now with readings from the Pi, and wiring diagrams.
-12. **Outputs** — the sketch talks back: wire a buzzer and 3 NeoPixels (the Outputs card has their Wiring diagrams), then hold the Buzzer button on the screen to sound the buzzer, and use the card's buttons to light the pixels; each sends a `sendToHardware()` message (see *Outputs* below).
+12. **Outputs** — the sketch talks back: wire a buzzer and 3 NeoPixels (the Outputs card has their Wiring diagrams), then hold the Buzzer button on the screen to sound the buzzer, and use the card's buttons to light the pixels or blink them, each a different colour; each sends a `sendToHardware()` message (see *Outputs* below).
 
 To add a step, write `steps/stepN.js` and add a line to `STEPS` in `steps.js`. To hide one without deleting it, add `hidden: true` to its line.
 A step gets input cards with `buildControlPanel(PROPS)` (or `buildControlPanel(null, ['slider', …])` for a few cards
